@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Dashboard</h1>
+    <div class="stats">
+        <h3>Total Links: {{ link_count }}</h3>
+    </div>
+    <div class="recent-links">
+        <h3>Recent Links</h3>
+        <ul>
+            {% for link in recent_links %}
+            <li>
+                <a href="{{ url_for('link_stats', short_code=link.short_code) }}">
+                    {{ link.short_code }} - {{ link.clicks }} clicks
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <a href="{{ url_for('links') }}" class="btn">Create New Link</a>
+{% endblock %}

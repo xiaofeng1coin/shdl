@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - Shortener</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <h1>用户登录</h1>
+        <form method="POST" action="{{ url_for('login') }}">
+            <input type="text" name="username" placeholder="用户名" required>
+            <input type="password" name="password" placeholder="密码" required>
+            <button type="submit" class="auth-btn">登录</button>
+        </form>
+        <div class="auth-link">
+            <span>没有账号？</span>
+            <a href="{{ url_for('register') }}">立即注册</a>
+        </div>
+    </div>
+</body>
+</html>

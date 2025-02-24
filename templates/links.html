@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Manage Links</h1>
+    <form method="POST">
+        <input type="url" name="original_url" placeholder="Long URL" required>
+        <input type="text" name="custom_suffix" placeholder="Custom suffix (optional)">
+        <button type="submit">Create</button>
+    </form>
+    
+    <table>
+        <tr>
+            <th>Short URL</th>
+            <th>Original URL</th>
+            <th>Clicks</th>
+            <th>Created</th>
+            <th>Actions</th>
+        </tr>
+        {% for link in links %}
+        <tr>
+            <td><a href="{{ base_url }}{{ link.short_code }}">{{ base_url }}{{ link.short_code }}</a></td>
+            <td>{{ link.original_url }}</td>
+            <td>{{ link.clicks }}</td>
+            <td>{{ link.created_at.strftime('%Y-%m-%d') }}</td>
+            <td>
+                <button onclick="copyToClipboard('{{ base_url }}{{ link.short_code }}')">Copy</button>
+                <a href="{{ url_for('link_stats', short_code=link.short_code) }}" class="btn">Stats</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    <script>
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text);
+        alert('Copied: ' + text);
+    }
+    </script>
+{% endblock %}
