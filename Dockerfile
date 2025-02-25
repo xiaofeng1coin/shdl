@@ -9,6 +9,9 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 COPY . .
-RUN pip install --no-cache-dir -r requirements.txt
+
+# 添加调试信息，查看 pip install 的输出
+RUN pip install --no-cache-dir -r requirements.txt || (echo "pip install failed" && exit 1)
+
 EXPOSE 8462
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]  # 修改启动命令
