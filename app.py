@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from models import db, User, Link
 from auth import login_manager
@@ -34,8 +34,8 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and user.password == password:
             login_user(user)
-            return redirect(url_for('index'))
-        return 'Invalid credentials'
+            return jsonify({"redirect": url_for('index')})
+        return jsonify({"error": "用户名密码错误"})
     return render_template('login.html')
 
 
@@ -45,11 +45,11 @@ def register():
         username = request.form['username']
         password = request.form['password']
         if User.query.filter_by(username=username).first():
-            return 'Username exists'
+            return jsonify({"error": "用户名已存在"})
         new_user = User(username=username, password=password)
         db.session.add(new_user)
         db.session.commit()
-        return redirect(url_for('login'))
+        return jsonify({"redirect": url_for('login')})
     return render_template('register.html')
 
 

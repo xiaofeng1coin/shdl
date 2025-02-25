@@ -8,17 +8,67 @@ body {
 }
 
 .sidebar {
-    width: 200px;
-    background: #f0f0f0;
-    padding: 20px;
+    width: 250px;
+    background: #2f353a;
+    color: #b7c0cd;
+    padding: 20px 0;
     height: 100vh;
+    box-sizing: border-box;
+    overflow-y: auto;
 }
 
-.sidebar a {
-    display: block;
-    padding: 10px;
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    margin-bottom: 20px;
+}
+
+.sidebar-brand i {
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.sidebar-brand h2 {
+    font-size: 20px;
+    color: #fff;
+    margin: 0;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-menu li {
+    margin-bottom: 5px;
+}
+
+.sidebar-menu .menu-header {
+    padding: 10px 20px;
+    font-size: 14px;
+    text-transform: uppercase;
+    color: #6c757d;
+}
+
+.sidebar-menu a {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
     text-decoration: none;
-    color: #333;
+    color: #b7c0cd;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.sidebar-menu a:hover {
+    background-color: #20a8d8;
+    color: #fff;
+}
+
+.sidebar-menu a i {
+    margin-right: 10px;
+    font-size: 18px;
 }
 
 .content {
@@ -102,76 +152,4 @@ input[type="url"], input[type="text"] {
 .auth-link a {
     color: #4CAF50;
     text-decoration: none;
-}
-
-/* 仪表盘页面样式 */
-.dashboard-container {
-    position: relative;
-    height: 100vh;
-}
-
-.dashboard-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url('https://source.unsplash.com/1600x900/?nature'); /* 背景图片 */
-    background-size: cover;
-    background-position: center;
-    filter: blur(5px); /* 模糊效果 */
-    z-index: -1;
-}
-
-.dashboard-content {
-    position: relative;
-    background: rgba(255, 255, 255, 0.8); /* 半透明背景 */
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    text-align: center;
-}
-
-.stats {
-    margin-bottom: 20px;
-}
-
-.recent-links {
-    margin-bottom: 20px;
-}
-
-.button-container {
-    margin-top: 20px;
-}
-
-.create-link-btn {
-    padding: 12px 24px;
-    font-size: 18px;
-    background: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-/* 创建按钮样式 */
-.create-btn {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #4CAF50; /* 背景颜色 */
-    color: white; /* 文字颜色 */
-    border: none;
-    border-radius: 5px; /* 圆角 */
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease; /* 过渡效果 */
-}
-
-.create-btn:hover {
-    background-color: #45a049; /* 鼠标悬停时的背景颜色 */
-}
-
-.create-link-btn:hover {
-    background-color: #45a049;
 }
