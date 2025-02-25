@@ -12,7 +12,7 @@
             <th>短链接</th>
             <th>原始链接</th>
             <th>点击量</th>
-            <th>创建时间</th>
+            <th>创建日期</th>
             <th>操作</th>
         </tr>
         {% for link in links %}
@@ -30,9 +30,42 @@
     </table>
     
     <script>
-    function copyToClipboard(text) {
-        navigator.clipboard.writeText(text);
-        alert('已复制: ' + text);
-    }
+        function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                // 使用 navigator.clipboard API 复制文本
+                navigator.clipboard.writeText(text)
+                   .then(() => {
+                        alert('已复制: ' + text);
+                    })
+                   .catch((error) => {
+                        console.error('复制文本失败: ', error);
+                        fallbackCopyTextToClipboard(text);
+                    });
+            } else {
+                // 使用旧的 document.execCommand 方法作为替代
+                fallbackCopyTextToClipboard(text);
+            }
+        }
+
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    alert('已复制: ' + text);
+                } else {
+                    console.error('使用 document.execCommand 复制文本失败');
+                }
+            } catch (err) {
+                console.error('复制文本时出错: ', err);
+            }
+
+            document.body.removeChild(textArea);
+        }
     </script>
 {% endblock %}
