@@ -1,149 +1,113 @@
-/* 新增 dashboard 容器样式 */
-.dashboard-container {
-    padding: 20px;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+body {
+    background-color: #0f172a; /* 深色背景 */
+    color: #fff; /* 白色文字 */
+    font-family: Arial, sans-serif;
 }
 
-/* 标题样式 */
-.dashboard-title {
-    text-align: center;
-    font-size: 36px;
-    color: #333;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 30px;
-    animation: fadeIn 1s ease-in-out;
-}
-
-/* 统计信息卡片样式 */
-.stats-card {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    margin-bottom: 30px;
-    animation: slideInLeft 1s ease-in-out;
-}
-
-.stats-title {
-    font-size: 24px;
-    color: #333;
-}
-
-/* 最近链接容器样式 */
-.recent-links-container {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin-bottom: 30px;
-    animation: slideInRight 1s ease-in-out;
-}
-
-.recent-links-title {
-    font-size: 24px;
-    color: #333;
-    margin-bottom: 20px;
-}
-
-.recent-links-scroll {
-    max-height: 300px;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 10px;
-}
-
-.recent-links-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.recent-links-item {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    transition: background-color 0.3s ease;
-}
-
-.recent-links-item:hover {
-    background-color: #f5f5f5;
-}
-
-.recent-links-link {
-    text-decoration: none;
-    color: #333;
+.container {
     display: flex;
-    justify-content: space-between;
 }
 
-.link-code {
-    font-weight: bold;
+.sidebar {
+    width: 200px;
+    background: #1e293b; /* 侧边栏背景 */
+    padding: 20px;
+    height: 100vh;
 }
 
-.link-clicks {
+.sidebar a {
+    display: block;
+    padding: 10px;
+    text-decoration: none;
+    color: #fff;
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #1e293b; /* 表格背景 */
+    color: #fff;
+}
+
+th, td {
+    border: 1px solid #334155; /* 表格边框 */
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #334155; /* 表头背景 */
+}
+
+.btn {
+    display: inline-block;
+    padding: 8px 16px;
+    background: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+input[type="url"], input[type="text"] {
+    width: 300px;
+    padding: 8px;
+    margin: 5px;
+    background-color: #1e293b; /* 输入框背景 */
+    color: #fff;
+    border: 1px solid #334155; /* 输入框边框 */
+}
+
+/* 新增认证页面样式 */
+.auth-container {
+    width: 400px;
+    margin: 50px auto;
+    padding: 30px;
+    background: #1e293b; /* 认证页面背景 */
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+.auth-container h1 {
+    text-align: center;
+    color: #fff;
+    margin-bottom: 30px;
+}
+
+.auth-container input[type="text"],
+.auth-container input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #334155; /* 认证页面输入框边框 */
+    border-radius: 4px;
+    box-sizing: border-box;
+    background-color: #1e293b; /* 认证页面输入框背景 */
+    color: #fff;
+}
+
+.auth-btn {
+    width: 100%;
+    padding: 12px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.auth-link {
+    text-align: center;
+    margin-top: 20px;
     color: #666;
 }
 
-/* 创建新链接按钮样式 */
-.create-link-btn {
-    display: inline-block;
-    padding: 12px 24px;
-    background-color: #4CAF50;
-    color: #fff;
+.auth-link a {
+    color: #4CAF50;
     text-decoration: none;
-    border-radius: 4px;
-    font-size: 18px;
-    transition: background-color 0.3s ease;
-    animation: pulse 2s infinite;
-}
-
-.create-link-btn:hover {
-    background-color: #45a049;
-}
-
-/* 动画效果 */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-@keyframes slideInLeft {
-    from {
-        transform: translateX(-100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-@keyframes slideInRight {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-@keyframes pulse {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.1);
-    }
-    100% {
-        transform: scale(1);
-    }
 }

@@ -1,31 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
-    <div class="dashboard-container">
-        <!-- 标题部分，添加一些特效 -->
-        <h1 class="dashboard-title">仪表盘</h1>
-
-        <!-- 统计信息部分，使用卡片样式 -->
-        <div class="stats-card">
-            <h3 class="stats-title">总链接数: {{ link_count }}</h3>
-        </div>
-
-        <!-- 最近链接部分，添加滚动效果和更多样式 -->
-        <div class="recent-links-container">
-            <h3 class="recent-links-title">最近链接</h3>
-            <div class="recent-links-scroll">
-                <ul class="recent-links-list">
-                    {% for link in recent_links %}
-                    <li class="recent-links-item">
-                        <a href="{{ url_for('link_stats', short_code=link.short_code) }}" class="recent-links-link">
-                            <span class="link-code">{{ link.short_code }}</span> - <span class="link-clicks">{{ link.clicks }} 次点击</span>
-                        </a>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
-
-        <!-- 创建新链接按钮，添加动画效果 -->
-        <a href="{{ url_for('links') }}" class="create-link-btn">创建新链接</a>
+    <h1>仪表盘</h1>
+    <div class="stats">
+        <h3>总链接数: {{ link_count }}</h3>
     </div>
+    <div class="recent-links">
+        <h3>最近的链接</h3>
+        <ul>
+            {% for link in recent_links %}
+            <li>
+                <a href="{{ url_for('link_stats', short_code=link.short_code) }}">
+                    {{ link.short_code }} - 点击量: {{ link.clicks }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <a href="{{ url_for('links') }}" class="btn">创建新链接</a>
 {% endblock %}
