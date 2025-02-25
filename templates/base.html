@@ -3,47 +3,84 @@
 <head>
     <title>Shortener</title>
     <link rel="stylesheet" href="/static/style.css">
-    <!-- 引入Font Awesome图标库 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* 左侧导航栏样式 */
+        .sidebar {
+            width: 200px;
+            background-color: #f8f9fa; /* 浅灰色背景 */
+            padding: 20px;
+            height: 100vh;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* 右侧阴影 */
+        }
+
+        .sidebar h2 {
+            color: #333; /* 标题颜色 */
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 10px 15px;
+            text-decoration: none;
+            color: #495057; /* 导航文字颜色 */
+            transition: background-color 0.3s; /* 过渡效果 */
+        }
+
+        .sidebar a:hover {
+            background-color: #e9ecef; /* 鼠标悬停背景色 */
+        }
+
+        /* 下拉菜单样式 */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-toggle {
+            cursor: pointer;
+        }
+
+        .dropdown-menu {
+            display: none;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+
+        .dropdown-menu a {
+            color: #6c757d; /* 下拉菜单文字颜色 */
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <div class="sidebar">
-            <!-- 品牌标识 -->
-            <div class="sidebar-brand">
-                <i class="fas fa-hotel"></i>
-                <h2>Shortener</h2>
+            <h2>Shortener</h2>
+            <a href="{{ url_for('index') }}">首页（仪表盘）</a>
+            <div class="dropdown">
+                <a href="#" class="dropdown-toggle">我的账户</a>
+                <div class="dropdown-menu">
+                    <a href="#">个人信息</a>
+                    <a href="#">账户安全</a>
+                </div>
             </div>
-            <!-- 导航菜单 -->
-            <ul class="sidebar-menu">
-                <li class="menu-header">
-                    <span><i class="fas fa-tachometer-alt"></i> 仪表盘</span>
-                </li>
-                <li>
-                    <a href="{{ url_for('index') }}">
-                        <i class="fas fa-home"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li>
-                <li class="menu-header">
-                    <span><i class="fas fa-link"></i> 链接管理</span>
-                </li>
-                <li>
-                    <a href="{{ url_for('links') }}">
-                        <i class="fas fa-list"></i>
-                        <span>Links</span>
-                    </a>
-                </li>
-                <li class="menu-header">
-                    <span><i class="fas fa-user"></i> 用户管理</span>
-                </li>
-                <li>
-                    <a href="{{ url_for('logout') }}">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Logout</span>
-                    </a>
-                </li>
-            </ul>
+            <div class="dropdown">
+                <a href="#" class="dropdown-toggle">短链管理</a>
+                <div class="dropdown-menu">
+                    <a href="{{ url_for('links') }}">我的短链</a>
+                </div>
+            </div>
+            <div class="dropdown">
+                <a href="#" class="dropdown-toggle">数据统计</a>
+                <div class="dropdown-menu">
+                    <a href="#">数据分析</a>
+                </div>
+            </div>
+            <a href="{{ url_for('logout') }}">Logout</a>
         </div>
         <div class="content">
             {% block content %}{% endblock %}
