@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Shortener</title>
+    <title>链接缩短器</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="container">
         <div class="sidebar">
-            <h2>Shortener</h2>
-            <a href="{{ url_for('index') }}">Dashboard</a>
-            <a href="{{ url_for('links') }}">Links</a>
-            <a href="{{ url_for('logout') }}">Logout</a>
+            <h2>链接缩短器</h2>
+            <a href="{{ url_for('index') }}">仪表盘</a>
+            <a href="{{ url_for('links') }}">链接管理</a>
+            <a href="{{ url_for('logout') }}">退出登录</a>
         </div>
         <div class="content">
             {% block content %}{% endblock %}

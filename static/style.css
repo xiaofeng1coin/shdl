@@ -1,6 +1,9 @@
+/* 使用更具科技感的字体 */
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
+    font-family: 'Courier New', monospace;
+    background-color: #0f172a; /* 深色背景 */
+    color: #e2e8f0; /* 浅色文字 */
 }
 
 .container {
@@ -9,16 +12,22 @@ body {
 
 .sidebar {
     width: 200px;
-    background: #f0f0f0;
+    background: #1e293b; /* 侧边栏深色背景 */
     padding: 20px;
     height: 100vh;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); /* 侧边栏阴影 */
 }
 
 .sidebar a {
     display: block;
     padding: 10px;
     text-decoration: none;
-    color: #333;
+    color: #64ffda; /* 科技感的链接颜色 */
+    transition: color 0.3s ease; /* 链接颜色过渡效果 */
+}
+
+.sidebar a:hover {
+    color: #a5f3fc; /* 鼠标悬停时的链接颜色 */
 }
 
 .content {
@@ -29,31 +38,40 @@ body {
 table {
     width: 100%;
     border-collapse: collapse;
+    background-color: #1e293b; /* 表格深色背景 */
 }
 
 th, td {
-    border: 1px solid #ddd;
+    border: 1px solid #334155; /* 表格边框颜色 */
     padding: 8px;
     text-align: left;
 }
 
 th {
-    background-color: #f0f0f0;
+    background-color: #334155; /* 表头背景颜色 */
 }
 
 .btn {
     display: inline-block;
     padding: 8px 16px;
-    background: #4CAF50;
-    color: white;
+    background: #22d3ee; /* 按钮背景颜色 */
+    color: #0f172a; /* 按钮文字颜色 */
     text-decoration: none;
     border-radius: 4px;
+    transition: background-color 0.3s ease; /* 按钮背景颜色过渡效果 */
+}
+
+.btn:hover {
+    background: #67e8f9; /* 鼠标悬停时的按钮背景颜色 */
 }
 
 input[type="url"], input[type="text"] {
     width: 300px;
     padding: 8px;
     margin: 5px;
+    background-color: #1e293b; /* 输入框背景颜色 */
+    border: 1px solid #334155; /* 输入框边框颜色 */
+    color: #e2e8f0; /* 输入框文字颜色 */
 }
 
 /* 新增认证页面样式 */
@@ -61,14 +79,14 @@ input[type="url"], input[type="text"] {
     width: 400px;
     margin: 50px auto;
     padding: 30px;
-    background: #fff;
+    background: #1e293b; /* 认证容器背景颜色 */
     border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* 认证容器阴影 */
 }
 
 .auth-container h1 {
     text-align: center;
-    color: #333;
+    color: #64ffda; /* 认证容器标题颜色 */
     margin-bottom: 30px;
 }
 
@@ -77,20 +95,27 @@ input[type="url"], input[type="text"] {
     width: 100%;
     padding: 12px;
     margin: 10px 0;
-    border: 1px solid #ddd;
+    border: 1px solid #334155; /* 认证输入框边框颜色 */
     border-radius: 4px;
     box-sizing: border-box;
+    background-color: #1e293b; /* 认证输入框背景颜色 */
+    color: #e2e8f0; /* 认证输入框文字颜色 */
 }
 
 .auth-btn {
     width: 100%;
     padding: 12px;
-    background: #4CAF50;
-    color: white;
+    background: #22d3ee; /* 认证按钮背景颜色 */
+    color: #0f172a; /* 认证按钮文字颜色 */
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
+    transition: background-color 0.3s ease; /* 认证按钮背景颜色过渡效果 */
+}
+
+.auth-btn:hover {
+    background: #67e8f9; /* 鼠标悬停时的认证按钮背景颜色 */
 }
 
 .auth-link {
@@ -100,6 +125,11 @@ input[type="url"], input[type="text"] {
 }
 
 .auth-link a {
-    color: #4CAF50;
+    color: #64ffda; /* 认证链接颜色 */
     text-decoration: none;
+    transition: color 0.3s ease; /* 认证链接颜色过渡效果 */
+}
+
+.auth-link a:hover {
+    color: #a5f3fc; /* 鼠标悬停时的认证链接颜色 */
 }
