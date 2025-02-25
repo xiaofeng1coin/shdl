@@ -1,6 +1,5 @@
 body {
-    background-color: #0f172a; /* 深色背景 */
-    color: #fff; /* 白色文字 */
+    margin: 0;
     font-family: Arial, sans-serif;
 }
 
@@ -10,7 +9,7 @@ body {
 
 .sidebar {
     width: 200px;
-    background: #1e293b; /* 侧边栏背景 */
+    background: #f0f0f0;
     padding: 20px;
     height: 100vh;
 }
@@ -19,7 +18,7 @@ body {
     display: block;
     padding: 10px;
     text-decoration: none;
-    color: #fff;
+    color: #333;
 }
 
 .content {
@@ -30,18 +29,16 @@ body {
 table {
     width: 100%;
     border-collapse: collapse;
-    background-color: #1e293b; /* 表格背景 */
-    color: #fff;
 }
 
 th, td {
-    border: 1px solid #334155; /* 表格边框 */
+    border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
 }
 
 th {
-    background-color: #334155; /* 表头背景 */
+    background-color: #f0f0f0;
 }
 
 .btn {
@@ -57,9 +54,6 @@ input[type="url"], input[type="text"] {
     width: 300px;
     padding: 8px;
     margin: 5px;
-    background-color: #1e293b; /* 输入框背景 */
-    color: #fff;
-    border: 1px solid #334155; /* 输入框边框 */
 }
 
 /* 新增认证页面样式 */
@@ -67,14 +61,14 @@ input[type="url"], input[type="text"] {
     width: 400px;
     margin: 50px auto;
     padding: 30px;
-    background: #1e293b; /* 认证页面背景 */
+    background: #fff;
     border-radius: 8px;
     box-shadow: 0 0 20px rgba(0,0,0,0.1);
 }
 
 .auth-container h1 {
     text-align: center;
-    color: #fff;
+    color: #333;
     margin-bottom: 30px;
 }
 
@@ -83,11 +77,9 @@ input[type="url"], input[type="text"] {
     width: 100%;
     padding: 12px;
     margin: 10px 0;
-    border: 1px solid #334155; /* 认证页面输入框边框 */
+    border: 1px solid #ddd;
     border-radius: 4px;
     box-sizing: border-box;
-    background-color: #1e293b; /* 认证页面输入框背景 */
-    color: #fff;
 }
 
 .auth-btn {
@@ -110,4 +102,76 @@ input[type="url"], input[type="text"] {
 .auth-link a {
     color: #4CAF50;
     text-decoration: none;
+}
+
+/* 仪表盘页面样式 */
+.dashboard-container {
+    position: relative;
+    height: 100vh;
+}
+
+.dashboard-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://source.unsplash.com/1600x900/?nature'); /* 背景图片 */
+    background-size: cover;
+    background-position: center;
+    filter: blur(5px); /* 模糊效果 */
+    z-index: -1;
+}
+
+.dashboard-content {
+    position: relative;
+    background: rgba(255, 255, 255, 0.8); /* 半透明背景 */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.stats {
+    margin-bottom: 20px;
+}
+
+.recent-links {
+    margin-bottom: 20px;
+}
+
+.button-container {
+    margin-top: 20px;
+}
+
+.create-link-btn {
+    padding: 12px 24px;
+    font-size: 18px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* 创建按钮样式 */
+.create-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #4CAF50; /* 背景颜色 */
+    color: white; /* 文字颜色 */
+    border: none;
+    border-radius: 5px; /* 圆角 */
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease; /* 过渡效果 */
+}
+
+.create-btn:hover {
+    background-color: #45a049; /* 鼠标悬停时的背景颜色 */
+}
+
+.create-link-btn:hover {
+    background-color: #45a049;
 }

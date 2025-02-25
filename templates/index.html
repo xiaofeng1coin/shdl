@@ -1,20 +1,28 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1>仪表盘</h1>
-    <div class="stats">
-        <h3>总链接数: {{ link_count }}</h3>
+    <div class="dashboard-container">
+        <!-- 背景图片 -->
+        <div class="dashboard-bg"></div>
+        <div class="dashboard-content">
+            <h1>仪表盘</h1>
+            <div class="stats">
+                <h3>链接总数: {{ link_count }}</h3>
+            </div>
+            <div class="recent-links">
+                <h3>最近的链接</h3>
+                <ul>
+                    {% for link in recent_links %}
+                    <li>
+                        <a href="{{ url_for('link_stats', short_code=link.short_code) }}">
+                            {{ link.short_code }} - {{ link.clicks }} 点击量
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="button-container">
+                <a href="{{ url_for('links') }}" class="btn create-link-btn">创建新链接</a>
+            </div>
+        </div>
     </div>
-    <div class="recent-links">
-        <h3>最近的链接</h3>
-        <ul>
-            {% for link in recent_links %}
-            <li>
-                <a href="{{ url_for('link_stats', short_code=link.short_code) }}">
-                    {{ link.short_code }} - 点击量: {{ link.clicks }}
-                </a>
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-    <a href="{{ url_for('links') }}" class="btn">创建新链接</a>
 {% endblock %}
