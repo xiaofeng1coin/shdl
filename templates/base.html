@@ -7,14 +7,14 @@
         /* 左侧导航栏样式 */
         .sidebar {
             width: 200px;
-            background-color: #f8f9fa; /* 浅灰色背景 */
+            background-color: #1a202c; /* 深灰色背景，更具科技感 */
             padding: 20px;
             height: 100vh;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* 右侧阴影 */
         }
 
         .sidebar h2 {
-            color: #333; /* 标题颜色 */
+            color: #4299e1; /* 蓝色标题，更现代 */
             margin-bottom: 20px;
         }
 
@@ -22,12 +22,12 @@
             display: block;
             padding: 10px 15px;
             text-decoration: none;
-            color: #495057; /* 导航文字颜色 */
+            color: #a0aec0; /* 导航文字颜色，浅灰色 */
             transition: background-color 0.3s; /* 过渡效果 */
         }
 
         .sidebar a:hover {
-            background-color: #e9ecef; /* 鼠标悬停背景色 */
+            background-color: #2d3748; /* 鼠标悬停背景色，深一点的灰色 */
         }
 
         /* 下拉菜单样式 */
@@ -37,54 +37,68 @@
 
         .dropdown-toggle {
             cursor: pointer;
+            position: relative;
+        }
+
+        .dropdown-toggle::after {
+            content: '\25BC'; /* 下拉标志 */
+            position: absolute;
+            right: 10px;
         }
 
         .dropdown-menu {
             display: none;
-            background-color: #fff;
+            background-color: #2d3748; /* 下拉菜单背景色 */
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             position: relative;
             padding-left: 20px;
         }
 
-        .dropdown:hover .dropdown-menu {
-            display: block;
+        .dropdown-menu a {
+            color: #a0aec0; /* 下拉菜单文字颜色 */
         }
 
-        .dropdown-menu a {
-            color: #6c757d; /* 下拉菜单文字颜色 */
+        /* 显示下拉菜单 */
+        .dropdown.active .dropdown-menu {
+            display: block;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="sidebar">
-            <h2>Shortener</h2>
+            <h2>短链管理系统</h2>
             <a href="{{ url_for('index') }}">首页（仪表盘）</a>
             <div class="dropdown">
-                <a href="#" class="dropdown-toggle">我的账户</a>
+                <a href="#" class="dropdown-toggle" onclick="toggleDropdown(this)">我的账户</a>
                 <div class="dropdown-menu">
                     <a href="#">个人信息</a>
                     <a href="#">账户安全</a>
                 </div>
             </div>
             <div class="dropdown">
-                <a href="#" class="dropdown-toggle">短链管理</a>
+                <a href="#" class="dropdown-toggle" onclick="toggleDropdown(this)">短链管理</a>
                 <div class="dropdown-menu">
                     <a href="{{ url_for('links') }}">我的短链</a>
                 </div>
             </div>
             <div class="dropdown">
-                <a href="#" class="dropdown-toggle">数据统计</a>
+                <a href="#" class="dropdown-toggle" onclick="toggleDropdown(this)">数据统计</a>
                 <div class="dropdown-menu">
                     <a href="#">数据分析</a>
                 </div>
             </div>
-            <a href="{{ url_for('logout') }}">Logout</a>
+            <a href="{{ url_for('logout') }}">退出账户</a>
         </div>
         <div class="content">
             {% block content %}{% endblock %}
         </div>
     </div>
+    <script>
+        function toggleDropdown(elem) {
+            const dropdown = elem.parentElement;
+            dropdown.classList.toggle('active');
+        }
+    </script>
 </body>
 </html>
