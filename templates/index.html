@@ -11,24 +11,29 @@
                 </div>
                 <div class="user-details">
                     <span class="username">{{ current_user.username }}</span>
-                    <span class="register-time">{{ current_user.register_time.strftime('%Y-%m-%d') }}</span>
+                    <div class="register-time">注册时间：{{ current_user.register_time.strftime('%Y-%m-%d') }}</div>
                 </div>
-                <div class="generation-stats">
-                    <div class="stat">
-                        <span class="stat-title">历史生成总量</span>
-                        <span class="stat-value total-value">{{ total_links }}</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-title">本月生成量</span>
-                        <span class="stat-value monthly-value">{{ monthly_links }}</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-title">昨日生成量</span>
-                        <span class="stat-value yesterday-value">{{ yesterday_links }}</span>
-                    </div>
-                </div>
-                <div class="update-time">更新时间: {{ update_time }}</div>
             </div>
+            <!-- 生成量统计 -->
+            <div class="generation-stats" style="margin-left: auto;">
+                <div class="stat">
+                    <span class="stat-title">历史生成总量</span>
+                    <span class="stat-value total-value">{{ total_links }}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-title">本月生成量</span>
+                    <span class="stat-value monthly-value">{{ monthly_links }}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-title">昨日生成量</span>
+                    <span class="stat-value yesterday-value">{{ yesterday_links }}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-title">今日生成量</span>
+                    <span class="stat-value today-value">{{ today_links }}</span>
+                </div>
+            </div>
+            <div class="update-time">更新时间: {{ update_time }}</div>
             <!-- 最近的链接 -->
             <div class="recent-links">
                 <h3>最近的链接</h3>
@@ -42,6 +47,7 @@
                     {% endfor %}
                 </ul>
             </div>
+            <!-- 创建新链接按钮 -->
             <div class="button-container">
                 <a href="{{ url_for('links') }}" class="btn create-link-btn">创建新链接</a>
             </div>

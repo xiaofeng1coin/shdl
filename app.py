@@ -64,7 +64,7 @@ def logout():
 @app.route('/index')
 @login_required
 def index():
-    # 获取历史生成总量、本月生成量、昨日生成量
+    # 获取历史生成总量、本月生成量、昨日生成量、今日生成量
     total_links = Link.query.filter_by(user_id=current_user.id).count()
 
     # 获取当前月份用于查询本月生成量
@@ -82,6 +82,13 @@ def index():
         func.date(Link.created_at) == yesterday_date
     ).count()
 
+    # 获取今天的日期用于查询今日生成量
+    today_date = datetime.now().date()
+    today_links = Link.query.filter(
+        Link.user_id == current_user.id,
+        func.date(Link.created_at) == today_date
+    ).count()
+
     update_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     links = Link.query.filter_by(user_id=current_user.id).order_by(Link.created_at.desc()).limit(5).all()
@@ -89,6 +96,7 @@ def index():
                            total_links=total_links,
                            monthly_links=monthly_links,
                            yesterday_links=yesterday_links,
+                           today_links=today_links,
                            update_time=update_time,
                            link_count=len(links),
                            recent_links=links)
