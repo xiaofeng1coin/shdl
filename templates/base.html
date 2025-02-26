@@ -44,6 +44,7 @@
             content: '\25BC'; /* 下拉标志 */
             position: absolute;
             right: 10px;
+            font-size: 12px; /* 调整三角号大小 */
         }
 
         .dropdown-menu {
@@ -61,6 +62,13 @@
         /* 显示下拉菜单 */
         .dropdown.active .dropdown-menu {
             display: block;
+        }
+
+        /* 内容区域的样式 */
+        .content {
+            flex: 1;
+            padding: 20px;
+            position: relative; /* 用于绝对定位按钮 */
         }
     </style>
 </head>

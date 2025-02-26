@@ -13,9 +13,13 @@
                     <span class="username">{{ current_user.username }}</span>
                     <div class="register-time">注册时间：{{ current_user.register_time.strftime('%Y-%m-%d') }}</div>
                 </div>
+                <!-- 创建新链接按钮 -->
+                <div class="create-link-btn-container">
+                    <a href="{{ url_for('links') }}" class="btn create-link-btn">创建新链接</a>
+                </div>
             </div>
             <!-- 生成量统计 -->
-            <div class="generation-stats" style="margin-left: auto;">
+            <div class="generation-stats" style="margin-left: auto; display: flex; justify-content: flex-end;">
                 <div class="stat">
                     <span class="stat-title">历史生成总量</span>
                     <span class="stat-value total-value">{{ total_links }}</span>
@@ -37,19 +41,28 @@
             <!-- 最近的链接 -->
             <div class="recent-links">
                 <h3>最近的链接</h3>
-                <ul>
-                    {% for i in range(0, recent_links|length if recent_links|length < 5 else 5) %}
-                    <li>
-                        <span class="link-number">{{ i + 1 }}.</span>
-                        <a href="{{ url_for('link_stats', short_code=recent_links[i].short_code) }}">{{ request.host_url }}{{ recent_links[i].short_code }}</a>
-                        <span class="link-clicks">点击量: {{ recent_links[i].clicks }}</span>
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <!-- 创建新链接按钮 -->
-            <div class="button-container">
-                <a href="{{ url_for('links') }}" class="btn create-link-btn">创建新链接</a>
+                <table class="recent-links-table">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>短链接</th>
+                            <th>点击量</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for link in recent_links[:5] %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>
+                                <a href="{{ url_for('link_stats', short_code=link.short_code) }}" class="link-url">
+                                    {{ request.host_url }}{{ link.short_code }}
+                                </a>
+                            </td>
+                            <td>{{ link.clicks }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
