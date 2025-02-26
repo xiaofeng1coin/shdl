@@ -4,30 +4,40 @@
         <!-- 背景图片 -->
         <div class="dashboard-bg"></div>
         <div class="dashboard-content">
-            <!-- 用户头像和用户名 -->
+            <!-- 用户信息 -->
             <div class="user-info">
-                <img src="{{ url_for('static', filename='default_avatar.jpg') }}" alt="用户头像" class="user-avatar">
-                <span class="username">{{ current_user.username }}</span>
+                <div class="user-avatar">
+                    <img src="{{ url_for('static', filename='avatar.jpg') }}" alt="Avatar" class="avatar-img">
+                </div>
+                <div class="user-details">
+                    <span class="username">{{ current_user.username }}</span>
+                    <span class="register-time">{{ current_user.register_time.strftime('%Y-%m-%d') }}</span>
+                </div>
+                <div class="generation-stats">
+                    <div class="stat">
+                        <span class="stat-title">历史生成总量</span>
+                        <span class="stat-value total-value">{{ total_links }}</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-title">本月生成量</span>
+                        <span class="stat-value monthly-value">{{ monthly_links }}</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-title">昨日生成量</span>
+                        <span class="stat-value yesterday-value">{{ yesterday_links }}</span>
+                    </div>
+                </div>
+                <div class="update-time">更新时间: {{ update_time }}</div>
             </div>
-            <!-- 注册时间 -->
-            <div class="register-time">
-                <h3>注册时间: {{ current_user.register_time.strftime('%Y-%m-%d') if current_user.register_time else '暂无' }}</h3>
-            </div>
-            <h1>仪表盘</h1>
-            <div class="stats">
-                <h3>历史生成总量: {{ total_links }}</h3>
-                <h3>本月生成量: {{ monthly_links }}</h3>
-                <h3>昨日生成量: {{ yesterday_links }}</h3>
-                <h3>更新时间: {{ last_update_time.strftime('%Y-%m-%d %H:%M:%S') if last_update_time else '暂无' }}</h3>
-            </div>
+            <!-- 最近的链接 -->
             <div class="recent-links">
                 <h3>最近的链接</h3>
                 <ul>
-                    {% for link in recent_links %}
+                    {% for i in range(0, recent_links|length if recent_links|length < 5 else 5) %}
                     <li>
-                        <a href="{{ url_for('link_stats', short_code=link.short_code) }}">
-                            {{ link.short_code }} - {{ link.clicks }} 点击量
-                        </a>
+                        <span class="link-number">{{ i + 1 }}.</span>
+                        <a href="{{ url_for('link_stats', short_code=recent_links[i].short_code) }}">{{ request.host_url }}{{ recent_links[i].short_code }}</a>
+                        <span class="link-clicks">点击量: {{ recent_links[i].clicks }}</span>
                     </li>
                     {% endfor %}
                 </ul>

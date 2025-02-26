@@ -4,6 +4,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from models import db, User, Link
 from auth import login_manager
 from datetime import datetime, timedelta
+from sqlalchemy import func
 import secrets
 
 app = Flask(__name__)
@@ -46,7 +47,7 @@ def register():
         password = request.form['password']
         if User.query.filter_by(username=username).first():
             return jsonify({"error": "用户名已存在"})
-        new_user = User(username=username, password=password, register_time=datetime.now())
+        new_user = User(username=username, password=password)
         db.session.add(new_user)
         db.session.commit()
         return jsonify({"redirect": url_for('login')})
@@ -63,34 +64,32 @@ def logout():
 @app.route('/index')
 @login_required
 def index():
-    # 计算历史生成总量
+    # 获取历史生成总量、本月生成量、昨日生成量
     total_links = Link.query.filter_by(user_id=current_user.id).count()
-    # 计算本月生成量
-    today = datetime.now()
-    first_day_of_month = today.replace(day=1)
+
+    # 获取当前月份用于查询本月生成量
+    current_month = datetime.now().strftime('%Y-%m')
     monthly_links = Link.query.filter(
         Link.user_id == current_user.id,
-        Link.created_at >= first_day_of_month
+        func.strftime('%Y-%m', Link.created_at) == current_month
     ).count()
-    # 计算昨日生成量
-    yesterday = today - timedelta(days=1)
-    yesterday_start = datetime(yesterday.year, yesterday.month, yesterday.day)
-    yesterday_end = yesterday_start + timedelta(days=1)
+
+    # 获取昨天的日期用于查询昨日生成量
+    yesterday = datetime.now() - timedelta(days=1)
+    yesterday_date = yesterday.date()
     yesterday_links = Link.query.filter(
         Link.user_id == current_user.id,
-        Link.created_at >= yesterday_start,
-        Link.created_at < yesterday_end
+        func.date(Link.created_at) == yesterday_date
     ).count()
-    # 最近更新时间
-    last_link = Link.query.filter_by(user_id=current_user.id).order_by(Link.created_at.desc()).first()
-    last_update_time = last_link.created_at if last_link else None
+
+    update_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     links = Link.query.filter_by(user_id=current_user.id).order_by(Link.created_at.desc()).limit(5).all()
     return render_template('index.html',
                            total_links=total_links,
                            monthly_links=monthly_links,
                            yesterday_links=yesterday_links,
-                           last_update_time=last_update_time,
+                           update_time=update_time,
                            link_count=len(links),
                            recent_links=links)
 
