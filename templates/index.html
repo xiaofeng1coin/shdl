@@ -4,9 +4,21 @@
         <!-- 背景图片 -->
         <div class="dashboard-bg"></div>
         <div class="dashboard-content">
+            <!-- 用户头像和用户名 -->
+            <div class="user-info">
+                <img src="{{ url_for('static', filename='default_avatar.jpg') }}" alt="用户头像" class="user-avatar">
+                <span class="username">{{ current_user.username }}</span>
+            </div>
+            <!-- 注册时间 -->
+            <div class="register-time">
+                <h3>注册时间: {{ current_user.register_time.strftime('%Y-%m-%d') if current_user.register_time else '暂无' }}</h3>
+            </div>
             <h1>仪表盘</h1>
             <div class="stats">
-                <h3>链接总数: {{ link_count }}</h3>
+                <h3>历史生成总量: {{ total_links }}</h3>
+                <h3>本月生成量: {{ monthly_links }}</h3>
+                <h3>昨日生成量: {{ yesterday_links }}</h3>
+                <h3>更新时间: {{ last_update_time.strftime('%Y-%m-%d %H:%M:%S') if last_update_time else '暂无' }}</h3>
             </div>
             <div class="recent-links">
                 <h3>最近的链接</h3>

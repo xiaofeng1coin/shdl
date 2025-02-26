@@ -7,6 +7,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100))
+    register_time = db.Column(db.DateTime, default=db.func.now())  # 添加注册时间字段
     links = db.relationship('Link', backref='user', lazy=True)
 
 class Link(db.Model):
