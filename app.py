@@ -145,6 +145,16 @@ def link_stats(short_code):
     link = Link.query.filter_by(short_code=short_code).first()
     return render_template('stats.html', link=link)
 
+@app.route('/profile')
+@login_required
+def profile():
+    # 获取用户的生成量和访问量
+    total_links = Link.query.filter_by(user_id=current_user.id).count()
+    total_clicks = Link.query.filter_by(user_id=current_user.id).with_entities(func.sum(Link.clicks)).scalar() or 0
+    return render_template('profile.html',
+                           total_links=total_links,
+                           total_clicks=total_clicks,
+                           user=current_user)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8462)

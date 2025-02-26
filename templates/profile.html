@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="profile-container">
+        <h1>个人信息</h1>
+        <div class="profile-content">
+            <!-- 头像上传 -->
+            <div class="avatar-container">
+                <div class="avatar-preview">
+                    <img src="{{ url_for('static', filename='avatar.jpg') }}" alt="Avatar" class="avatar-img">
+                </div>
+                <div class="avatar-upload">
+                    <label for="avatar-upload" class="upload-label">点击更换</label>
+                    <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+                </div>
+            </div>
+            <!-- 用户信息 -->
+            <div class="user-profile-info">
+                <p><strong>用户名：</strong>{{ user.username }}</p>
+                <p><strong>生成量：</strong>{{ total_links }}</p>
+                <p><strong>访问量：</strong>{{ total_clicks }}</p>
+                <p><strong>时区：</strong>{{ user.timezone }}</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

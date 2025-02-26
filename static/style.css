@@ -243,3 +243,57 @@ input[type="url"], input[type="text"] {
     color: #4CAF50;
     text-decoration: none;
 }
+
+/* 个人信息页面样式 */
+.profile-container {
+    padding: 20px;
+}
+
+.profile-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.avatar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.avatar-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 60px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-upload {
+    cursor: pointer;
+}
+
+.upload-label {
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.user-profile-info {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.user-profile-info p {
+    margin: 5px 0;
+}
