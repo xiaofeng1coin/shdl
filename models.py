@@ -5,11 +5,12 @@ db = SQLAlchemy()
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), unique=True)
+    account_name = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100))
+    nickname = db.Column(db.String(100), unique=True)  # 新增昵称字段
     register_time = db.Column(db.DateTime, default=db.func.now())
     timezone = db.Column(db.String(50), default="UTC")
-    avatar = db.Column(db.String(200), default="avatar.jpg")  # 默认头像路径
+    avatar = db.Column(db.String(200), default="avatar.jpg")
     links = db.relationship('Link', backref='user', lazy=True)
 
 class Link(db.Model):

@@ -437,3 +437,11 @@ input[type="url"], input[type="text"] {
 .modal-footer button {
     margin-right: 10px;
 }
+
+.delete-btn {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+}

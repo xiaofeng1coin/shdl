@@ -1,10 +1,10 @@
-{% extends "base.html" %}  <!-- 确保继承了 base.html -->
+{% extends "base.html" %}
 {% block content %}
     <h2>账户安全</h2>
     <div class="form-container">
-        <label for="username">用户名</label>
-        <input type="text" id="username" value="{{ user.username }}" readonly>
-        <button id="edit-username-btn">修改</button>
+        <label for="nickname">昵称</label>
+        <input type="text" id="nickname" value="{{ user.nickname }}" readonly>
+        <button id="edit-nickname-btn">修改</button>
     </div>
     <div class="form-container">
         <label for="password">密码</label>
@@ -15,15 +15,18 @@
         <label for="register-time">注册时间</label>
         <div class="info-value">{{ user.register_time.strftime('%Y-%m-%d %H:%M:%S') }}</div>
     </div>
+    <div class="form-container">
+        <button id="delete-account-btn" class="delete-btn">注销账户</button>
+    </div>
 
-    <!-- 修改用户名的模态框 -->
-    <div id="username-modal" class="modal">
+    <!-- 修改昵称的模态框 -->
+    <div id="nickname-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">新用户名</div>
-            <input type="text" id="new-username" placeholder="请输入新的用户名">
+            <div class="modal-header">新昵称</div>
+            <input type="text" id="new-nickname" placeholder="请输入新的昵称">
             <div class="modal-footer">
-                <button id="confirm-username-btn">确定</button>
-                <button id="cancel-username-btn">取消</button>
+                <button id="confirm-nickname-btn">确定</button>
+                <button id="cancel-nickname-btn">取消</button>
             </div>
         </div>
     </div>
@@ -41,55 +44,98 @@
         </div>
     </div>
 
+    <!-- 注销账户的模态框 -->
+    <div id="delete-account-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">确认注销</div>
+            <p>确定要注销账户吗？注销后将无法使用该账户登录。</p>
+            <div class="modal-footer">
+                <button id="confirm-delete-btn">确认注销</button>
+                <button id="cancel-delete-btn">取消</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 提示信息 -->
     <div id="notification" class="notification"></div>
 
     <script>
-        // 修改用户名
-        document.getElementById('edit-username-btn').addEventListener('click', function() {
-            document.getElementById('username-modal').style.display = 'block';
+        // 修改昵称逻辑
+        document.getElementById('edit-nickname-btn').addEventListener('click', function() {
+            document.getElementById('nickname-modal').style.display = 'block';
         });
 
-        document.getElementById('confirm-username-btn').addEventListener('click', function() {
-            const newUsername = document.getElementById('new-username').value;
-            if (newUsername) {
-                fetch('/update_username', {
+        document.getElementById('confirm-nickname-btn').addEventListener('click', function() {
+            const newNickname = document.getElementById('new-nickname').value;
+            if (newNickname) {
+                fetch('/update_nickname', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `new_username=${newUsername}`
+                    body: `new_nickname=${newNickname}`
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        document.getElementById('username').value = newUsername;
+                        document.getElementById('nickname').value = newNickname;
                         showNotification(data.message, 'success');
                     } else {
                         showNotification(data.message, 'error');
                     }
-                    document.getElementById('username-modal').style.display = 'none';
+                    document.getElementById('nickname-modal').style.display = 'none';
                 });
             } else {
-                showNotification('新用户名不能为空', 'error');
+                showNotification('新昵称不能为空', 'error');
             }
         });
 
-        document.getElementById('cancel-username-btn').addEventListener('click', function() {
-            document.getElementById('username-modal').style.display = 'none';
+        document.getElementById('cancel-nickname-btn').addEventListener('click', function() {
+            document.getElementById('nickname-modal').style.display = 'none';
         });
 
-        // 修改密码
+        // 修改密码逻辑
         document.getElementById('edit-password-btn').addEventListener('click', function() {
-        document.getElementById('password-modal').style.display = 'block';
-    });
+            document.getElementById('password-modal').style.display = 'block';
+        });
 
-    document.getElementById('confirm-password-btn').addEventListener('click', function() {
-        const newPassword = document.getElementById('new-password').value;
-        const confirmPassword = document.getElementById('confirm-password').value;
-        if (newPassword && newPassword === confirmPassword) {
-            fetch('/update_password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `new_password=${newPassword}&confirm_password=${confirmPassword}`
+        document.getElementById('confirm-password-btn').addEventListener('click', function() {
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            if (newPassword && newPassword === confirmPassword) {
+                fetch('/update_password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `new_password=${newPassword}&confirm_password=${confirmPassword}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification(data.message, 'success');
+                        // 自动跳转到登录页面
+                        setTimeout(() => {
+                            window.location.href = "{{ url_for('login') }}";
+                        }, 2000);  // 2秒后跳转
+                    } else {
+                        showNotification(data.message, 'error');
+                    }
+                    document.getElementById('password-modal').style.display = 'none';
+                });
+            } else {
+                showNotification('两次输入的密码不一致', 'error');
+            }
+        });
+
+        document.getElementById('cancel-password-btn').addEventListener('click', function() {
+            document.getElementById('password-modal').style.display = 'none';
+        });
+
+        // 注销账户逻辑
+        document.getElementById('delete-account-btn').addEventListener('click', function() {
+            document.getElementById('delete-account-modal').style.display = 'block';
+        });
+
+        document.getElementById('confirm-delete-btn').addEventListener('click', function() {
+            fetch('/delete_account', {
+                method: 'POST'
             })
             .then(response => response.json())
             .then(data => {
@@ -102,28 +148,25 @@
                 } else {
                     showNotification(data.message, 'error');
                 }
-                document.getElementById('password-modal').style.display = 'none';
+                document.getElementById('delete-account-modal').style.display = 'none';
             });
-        } else {
-            showNotification('两次输入的密码不一致', 'error');
+        });
+
+        document.getElementById('cancel-delete-btn').addEventListener('click', function() {
+            document.getElementById('delete-account-modal').style.display = 'none';
+        });
+
+        // 提示信息显示函数
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.innerText = message;
+            notification.className = `notification ${type}`;
+            notification.style.opacity = 1;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.opacity = 0;
+                setTimeout(() => notification.style.display = 'none', 500);
+            }, 3000);
         }
-    });
-
-    document.getElementById('cancel-password-btn').addEventListener('click', function() {
-        document.getElementById('password-modal').style.display = 'none';
-    });
-
-    // 提示信息显示函数
-    function showNotification(message, type) {
-        const notification = document.getElementById('notification');
-        notification.innerText = message;
-        notification.className = `notification ${type}`;
-        notification.style.opacity = 1;
-        notification.style.display = 'block';
-        setTimeout(() => {
-            notification.style.opacity = 0;
-            setTimeout(() => notification.style.display = 'none', 500);
-        }, 3000);
-    }
     </script>
-{% endblock %}  <!-- 确保正确关闭 block -->
+{% endblock %}

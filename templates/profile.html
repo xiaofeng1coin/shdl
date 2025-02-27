@@ -12,12 +12,12 @@
             </div>
             <div class="user-profile-info">
                 <div class="info-item left-item">
-                    <p class="info-label">用户名</p>
-                    <div class="info-value">{{ user.username }}</div>
+                    <p class="info-label">昵称</p>  <!-- 修改为昵称 -->
+                    <div class="info-value">{{ current_user.nickname }}</div>  <!-- 修改为昵称 -->
                 </div>
                 <div class="info-item right-item">
                     <p class="info-label">注册时间</p>
-                    <div class="info-value">{{ user.register_time.strftime('%Y-%m-%d') }}</div>
+                    <div class="info-value">{{ current_user.register_time.strftime('%Y-%m-%d') }}</div>
                 </div>
                 <div class="info-item right-item">
                     <p class="info-label">生成量</p>
@@ -80,7 +80,7 @@
                         ] %}
                         {% for tz in timezones %}
                             <option value="{{ tz.value }}"
-                                    {% if user.timezone == tz.value %}selected{% endif %}>
+                                    {% if current_user.timezone == tz.value %}selected{% endif %}>
                                 {{ tz.name }}
                             </option>
                         {% endfor %}

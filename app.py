@@ -35,25 +35,39 @@ def home():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
+        account_name = request.form['account_name']  # 修改为 account_name
         password = request.form['password']
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter_by(account_name=account_name).first()  # 修改为 account_name
         if user and user.password == password:
             login_user(user, remember=True)  # 使用 remember=True 保持登录状态
             session.permanent = True  # 设置 session 为持久化
             app.permanent_session_lifetime = timedelta(hours=24)  # 设置 session 有效期为 24 小时
             return jsonify({"redirect": url_for('index')})
-        return jsonify({"error": "用户名密码错误"})
+        return jsonify({"error": "账户名或密码错误"})
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username']
+        account_name = request.form['account_name']
         password = request.form['password']
-        if User.query.filter_by(username=username).first():
-            return jsonify({"error": "用户名已存在"})
-        new_user = User(username=username, password=password)
+        confirm_password = request.form['confirm_password']  # 新增密码确认
+        nickname = request.form['nickname']  # 新增昵称
+
+        # 校验密码和确认密码是否一致
+        if password != confirm_password:
+            return jsonify({"error": "两次输入的密码不一致"})
+
+        # 校验账户名是否已存在
+        if User.query.filter_by(account_name=account_name).first():
+            return jsonify({"error": "账户名已存在"})
+
+        # 校验昵称是否已存在
+        if User.query.filter_by(nickname=nickname).first():
+            return jsonify({"error": "昵称已被使用"})
+
+        # 创建新用户
+        new_user = User(account_name=account_name, password=password, nickname=nickname)
         db.session.add(new_user)
         db.session.commit()
         return jsonify({"redirect": url_for('login')})
@@ -162,7 +176,6 @@ def update_timezone():
         return jsonify({"success": True})
     return jsonify({"success": False})
 
-
 @app.route('/upload_avatar', methods=['POST'])
 @login_required
 def upload_avatar():
@@ -189,18 +202,19 @@ def upload_avatar():
 def account_security():
     return render_template('account_security.html', user=current_user)
 
-@app.route('/update_username', methods=['POST'])
-@login_required
-def update_username():
-    new_username = request.form.get('new_username')
-    if not new_username:
-        return jsonify({"success": False, "message": "用户名不能为空"})
-    if User.query.filter_by(username=new_username).first():
-        return jsonify({"success": False, "message": "用户名已存在"})
-    current_user.username = new_username
-    db.session.commit()
-    return jsonify({"success": True, "message": "用户名更新成功"})
 
+
+@app.route('/update_nickname', methods=['POST'])
+@login_required
+def update_nickname():
+    new_nickname = request.form.get('new_nickname')
+    if not new_nickname:
+        return jsonify({"success": False, "message": "昵称不能为空"})
+    if User.query.filter_by(nickname=new_nickname).first():
+        return jsonify({"success": False, "message": "昵称已被使用"})
+    current_user.nickname = new_nickname
+    db.session.commit()
+    return jsonify({"success": True, "message": "昵称更新成功"})
 
 @app.route('/update_password', methods=['POST'])
 @login_required
@@ -220,6 +234,18 @@ def update_password():
     logout_user()
 
     return jsonify({"success": True, "message": "密码更新成功，请重新登录"})
+
+@app.route('/delete_account', methods=['POST'])
+@login_required
+def delete_account():
+    try:
+        # 删除当前用户
+        db.session.delete(current_user)
+        db.session.commit()
+        logout_user()  # 注销登录
+        return jsonify({"success": True, "message": "账户已注销，您将被重定向到登录页面"})
+    except Exception as e:
+        return jsonify({"success": False, "message": "注销失败，请稍后再试"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8462)

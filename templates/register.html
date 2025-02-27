@@ -27,8 +27,10 @@
     <div class="auth-container">
         <h1>用户注册</h1>
         <form method="POST" action="{{ url_for('register') }}" onsubmit="return validateForm(this);">
-            <input type="text" name="username" placeholder="用户名" required>
+            <input type="text" name="account_name" placeholder="账户名" required>
+            <input type="text" name="nickname" placeholder="昵称" required>  <!-- 新增昵称 -->
             <input type="password" name="password" placeholder="密码" required>
+            <input type="password" name="confirm_password" placeholder="确认密码" required>  <!-- 新增密码确认 -->
             <button type="submit" class="auth-btn">注册</button>
         </form>
         <div class="auth-link">

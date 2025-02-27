@@ -1,24 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
     <div class="dashboard-container">
-        <!-- 背景图片 -->
         <div class="dashboard-bg"></div>
         <div class="dashboard-content">
-            <!-- 用户信息 -->
             <div class="user-info">
                 <div class="user-avatar">
                     <img src="{{ url_for('static', filename=current_user.avatar) }}" alt="Avatar" class="avatar-img">
                 </div>
                 <div class="user-details">
-                    <span class="username">{{ current_user.username }}</span>
+                    <span class="username">{{ current_user.nickname }}</span>  <!-- 显示昵称 -->
                     <div class="register-time">注册时间：{{ current_user.register_time.strftime('%Y-%m-%d') }}</div>
                 </div>
-                <!-- 创建新链接按钮 -->
                 <div class="create-link-btn-container">
                     <a href="{{ url_for('links') }}" class="btn create-link-btn">创建新链接</a>
                 </div>
             </div>
-            <!-- 生成量统计 -->
             <div class="generation-stats" style="margin-left: auto; display: flex; justify-content: flex-end;">
                 <div class="stat">
                     <span class="stat-title">历史生成总量</span>
@@ -38,7 +34,6 @@
                 </div>
             </div>
             <div class="update-time">更新时间: {{ update_time }}</div>
-            <!-- 最近的链接 -->
             <div class="recent-links">
                 <h3>最近的链接</h3>
                 <table class="recent-links-table">
