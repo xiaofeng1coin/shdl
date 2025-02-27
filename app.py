@@ -1,6 +1,6 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, jsonify
-from flask_login import login_user, logout_user, login_required, current_user
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session
+from flask_login import login_user, logout_user, login_required, current_user, LoginManager
 from models import db, User, Link
 from auth import login_manager
 from datetime import datetime, timedelta
@@ -34,7 +34,9 @@ def login():
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
         if user and user.password == password:
-            login_user(user)
+            login_user(user, remember=True)  # 使用 remember=True 保持登录状态
+            session.permanent = True  # 设置 session 为持久化
+            app.permanent_session_lifetime = timedelta(hours=24)  # 设置 session 有效期为 24 小时
             return jsonify({"redirect": url_for('index')})
         return jsonify({"error": "用户名密码错误"})
     return render_template('login.html')
@@ -64,17 +66,13 @@ def logout():
 @app.route('/index')
 @login_required
 def index():
-    # 获取历史生成总量、本月生成量、昨日生成量、今日生成量
     total_links = Link.query.filter_by(user_id=current_user.id).count()
-
-    # 获取当前月份用于查询本月生成量
     current_month = datetime.now().strftime('%Y-%m')
     monthly_links = Link.query.filter(
         Link.user_id == current_user.id,
         func.strftime('%Y-%m', Link.created_at) == current_month
     ).count()
 
-    # 获取昨天的日期用于查询昨日生成量
     yesterday = datetime.now() - timedelta(days=1)
     yesterday_date = yesterday.date()
     yesterday_links = Link.query.filter(
@@ -82,7 +80,6 @@ def index():
         func.date(Link.created_at) == yesterday_date
     ).count()
 
-    # 获取今天的日期用于查询今日生成量
     today_date = datetime.now().date()
     today_links = Link.query.filter(
         Link.user_id == current_user.id,
@@ -145,16 +142,17 @@ def link_stats(short_code):
     link = Link.query.filter_by(short_code=short_code).first()
     return render_template('stats.html', link=link)
 
+
 @app.route('/profile')
 @login_required
 def profile():
-    # 获取用户的生成量和访问量
     total_links = Link.query.filter_by(user_id=current_user.id).count()
     total_clicks = Link.query.filter_by(user_id=current_user.id).with_entities(func.sum(Link.clicks)).scalar() or 0
     return render_template('profile.html',
                            total_links=total_links,
                            total_clicks=total_clicks,
                            user=current_user)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8462)

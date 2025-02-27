@@ -248,6 +248,26 @@ input[type="url"], input[type="text"] {
     text-decoration: none;
 }
 
+/* 时区选择框样式 */
+.timezone-select {
+    width: 50%; /* 设置宽度为父容器的三分之二 */
+    padding: 2.5px; /* 与其他 info-value 内边距相同 */
+    box-sizing: border-box; /* 包含内边距和边框 */
+    border: 1px solid #ddd; /* 添加边框 */
+    border-radius: 4px; /* 圆角 */
+    appearance: none; /* 移除默认样式 */
+    -webkit-appearance: none; /* 针对 Safari 和 Chrome */
+    -moz-appearance: none; /* 针对 Firefox */
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10"><path d="M0 2l5 5 5-5H0z" fill="%23666"/></svg>') no-repeat right 8px center/10px 10px; /* 自定义下拉箭头 */
+    cursor: pointer;
+    overflow: visible; /* 确保选项可以从框中穿出 */
+    z-index: 100; /* 确保下拉框在其他元素之上 */
+    height: 38px; /* 设置高度与用户名展示框一致 */
+    line-height: 1.5; /* 调整行高以确保文字居中显示 */
+}
+
+
+
 
 /* 个人信息页面样式 */
 .profile-container {
@@ -324,13 +344,22 @@ input[type="url"], input[type="text"] {
     box-sizing: border-box; /* 包含内边距和边框 */
 }
 
+/* 每个信息项的布局 */
 .info-item {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    width: 48%; /* 每列占据一半宽度 */
-    margin-bottom: 10px;
-    box-sizing: border-box; /* 包含内边距和边框 */
+    width: 100%;
+    margin-bottom: 20px; /* 增加每个信息项之间的间距 */
+    box-sizing: border-box;
+}
+
+/* 信息标签 */
+.info-label {
+    margin: 0;
+    font-weight: bold;
+    width: 100%;
+    margin-bottom: 10px; /* 增加标签与值之间的间距 */
 }
 
 .info-item.left-item {
@@ -341,20 +370,18 @@ input[type="url"], input[type="text"] {
     width: 48%; /* 右侧信息占据页面的48% */
 }
 
-.info-label {
-    margin: 0;
-    font-weight: bold;
-    width: 100%; /* 确保标签宽度不超过容器 */
-}
 
+
+/* 通用展示框样式 */
 .info-value {
-    margin: 0;
-    padding: 2.5px; /* 缩小内边距 */
-    background-color: #f0f0f0; /* 方框背景色 */
-    border: 1px solid #ddd; /* 方框边框 */
-    border-radius: 4px; /* 方框圆角 */
-    width: 50%; /* 缩小宽度为原来的一半 */
-    text-align: center; /* 值居中对齐 */
+    width: 66%; /* 设置宽度为父容器的三分之二 */
+    padding: 8px; /* 内边距 */
+    background-color: #f0f0f0; /* 背景颜色 */
+    border: 1px solid #ddd; /* 边框 */
+    border-radius: 4px; /* 圆角 */
+    height: 38px; /* 高度与下拉框一致 */
+    line-height: 1.5; /* 文字居中显示 */
+    text-align: center; /* 文字居中对齐 */
     box-sizing: border-box; /* 包含内边距和边框 */
 }
 
