@@ -6,6 +6,7 @@ from auth import login_manager
 from datetime import datetime, timedelta
 from sqlalchemy import func
 import secrets
+import pytz  # 引入 pytz 库以支持完整的时区名称
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
@@ -152,6 +153,18 @@ def profile():
                            total_links=total_links,
                            total_clicks=total_clicks,
                            user=current_user)
+
+
+@app.route('/update_timezone', methods=['POST'])
+@login_required
+def update_timezone():
+    data = request.json
+    new_timezone = data.get('timezone')
+    if new_timezone in pytz.all_timezones:  # 检查时区是否有效
+        current_user.timezone = new_timezone
+        db.session.commit()
+        return jsonify({"success": True})
+    return jsonify({"success": False})
 
 
 if __name__ == '__main__':

@@ -250,8 +250,8 @@ input[type="url"], input[type="text"] {
 
 /* 时区选择框样式 */
 .timezone-select {
-    width: 50%; /* 设置宽度为父容器的三分之二 */
-    padding: 2.5px; /* 与其他 info-value 内边距相同 */
+    width: 66%; /* 设置宽度为父容器的三分之二 */
+    padding: 8px; /* 与其他 info-value 内边距相同 */
     box-sizing: border-box; /* 包含内边距和边框 */
     border: 1px solid #ddd; /* 添加边框 */
     border-radius: 4px; /* 圆角 */
@@ -385,3 +385,23 @@ input[type="url"], input[type="text"] {
     box-sizing: border-box; /* 包含内边距和边框 */
 }
 
+/* 通知区域样式 */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    color: white;
+    z-index: 1000;
+    transition: opacity 0.5s ease;
+}
+
+.notification.success {
+    background-color: #4CAF50; /* 绿色，表示成功 */
+}
+
+.notification.error {
+    background-color: #F44336; /* 红色，表示错误 */
+}

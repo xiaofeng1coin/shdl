@@ -34,35 +34,105 @@
                 <!-- 新增时区选择框 -->
                 <div class="info-item left-item">
                     <p class="info-label">时区</p>
-                    <select class="info-value timezone-select">
-                        <option value="UTC-12">UTC-12</option>
-                        <option value="UTC-11">UTC-11</option>
-                        <option value="UTC-10">UTC-10</option>
-                        <option value="UTC-9">UTC-9</option>
-                        <option value="UTC-8">UTC-8</option>
-                        <option value="UTC-7">UTC-7</option>
-                        <option value="UTC-6">UTC-6</option>
-                        <option value="UTC-5">UTC-5</option>
-                        <option value="UTC-4">UTC-4</option>
-                        <option value="UTC-3">UTC-3</option>
-                        <option value="UTC-2">UTC-2</option>
-                        <option value="UTC-1">UTC-1</option>
-                        <option value="UTC+0" selected>UTC+0</option>
-                        <option value="UTC+1">UTC+1</option>
-                        <option value="UTC+2">UTC+2</option>
-                        <option value="UTC+3">UTC+3</option>
-                        <option value="UTC+4">UTC+4</option>
-                        <option value="UTC+5">UTC+5</option>
-                        <option value="UTC+6">UTC+6</option>
-                        <option value="UTC+7">UTC+7</option>
-                        <option value="UTC+8">UTC+8</option>
-                        <option value="UTC+9">UTC+9</option>
-                        <option value="UTC+10">UTC+10</option>
-                        <option value="UTC+11">UTC+11</option>
-                        <option value="UTC+12">UTC+12</option>
+                    <select class="info-value timezone-select" id="timezone-select">
+                        <!-- 预定义的中文时区列表 -->
+                        {% set timezones = [
+                            {"value": "Asia/Shanghai", "name": "中国标准时间 (北京时间)"},
+                            {"value": "Asia/Hong_Kong", "name": "香港时间"},
+                            {"value": "Asia/Taipei", "name": "台北时间"},
+                            {"value": "Asia/Tokyo", "name": "日本标准时间"},
+                            {"value": "Asia/Seoul", "name": "韩国标准时间"},
+                            {"value": "Asia/Singapore", "name": "新加坡时间"},
+                            {"value": "Asia/Bangkok", "name": "泰国时间"},
+                            {"value": "Asia/Kuala_Lumpur", "name": "马来西亚时间"},
+                            {"value": "Asia/Jakarta", "name": "印尼时间"},
+                            {"value": "Asia/Dhaka", "name": "孟加拉国时间"},
+                            {"value": "Asia/Kolkata", "name": "印度标准时间"},
+                            {"value": "Asia/Tehran", "name": "伊朗标准时间"},
+                            {"value": "Asia/Dubai", "name": "阿联酋标准时间"},
+                            {"value": "Asia/Riyadh", "name": "沙特阿拉伯标准时间"},
+                            {"value": "Asia/Bahrain", "name": "巴林时间"},
+                            {"value": "Asia/Qatar", "name": "卡塔尔时间"},
+                            {"value": "Asia/Kuwait", "name": "科威特时间"},
+                            {"value": "Asia/Baghdad", "name": "伊拉克时间"},
+                            {"value": "Asia/Tbilisi", "name": "格鲁吉亚时间"},
+                            {"value": "Asia/Yerevan", "name": "亚美尼亚时间"},
+                            {"value": "Asia/Baku", "name": "阿塞拜疆时间"},
+                            {"value": "Asia/Dubai", "name": "阿联酋时间"},
+                            {"value": "Asia/Muscat", "name": "阿曼时间"},
+                            {"value": "Asia/Beirut", "name": "黎巴嫩时间"},
+                            {"value": "Asia/Jerusalem", "name": "以色列时间"},
+                            {"value": "Asia/Amman", "name": "约旦时间"},
+                            {"value": "Asia/Nicosia", "name": "塞浦路斯时间"},
+                            {"value": "Asia/Athens", "name": "希腊时间"},
+                            {"value": "Asia/Istanbul", "name": "土耳其时间"},
+                            {"value": "Asia/Kiev", "name": "乌克兰时间"},
+                            {"value": "Asia/Moscow", "name": "莫斯科时间"},
+                            {"value": "Asia/Novosibirsk", "name": "新西伯利亚时间"},
+                            {"value": "Asia/Krasnoyarsk", "name": "克拉斯诺亚尔斯克时间"},
+                            {"value": "Asia/Irkutsk", "name": "伊尔库茨克时间"},
+                            {"value": "Asia/Yakutsk", "name": "雅库茨克时间"},
+                            {"value": "Asia/Vladivostok", "name": "符拉迪沃斯托克时间"},
+                            {"value": "Asia/Magadan", "name": "马加丹时间"},
+                            {"value": "Asia/Kamchatka", "name": "堪察加时间"},
+                            {"value": "Asia/Anadyr", "name": "阿纳德尔时间"},
+                            {"value": "UTC", "name": "协调世界时 (UTC)"}
+                        ] %}
+                        {% for tz in timezones %}
+                            <option value="{{ tz.value }}"
+                                    {% if user.timezone == tz.value %}selected{% endif %}>
+                                {{ tz.name }}
+                            </option>
+                        {% endfor %}
                     </select>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- 添加一个隐藏的通知区域 -->
+    <div id="notification" class="notification" style="display: none;">
+        <p id="notification-message"></p>
+    </div>
+
+    <script>
+        document.getElementById('timezone-select').addEventListener('change', function() {
+            const selectedTimezone = this.value;
+            fetch('/update_timezone', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ timezone: selectedTimezone })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('时区已更新', 'success');
+                } else {
+                    showNotification('更新失败，请重试', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('发生错误，请稍后再试', 'error');
+            });
+        });
+
+        // 显示通知的函数
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            const notificationMessage = document.getElementById('notification-message');
+            notificationMessage.textContent = message;
+            notification.style.display = 'block';
+
+            // 根据类型设置通知的样式
+            notification.className = `notification ${type}`;
+
+            // 5秒后自动隐藏通知
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+    </script>
 {% endblock %}
