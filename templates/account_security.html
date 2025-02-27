@@ -1,22 +1,30 @@
 {% extends "base.html" %}
 {% block content %}
-    <h2>账户安全</h2>
-    <div class="form-container">
-        <label for="nickname">昵称</label>
-        <input type="text" id="nickname" value="{{ user.nickname }}" readonly>
-        <button id="edit-nickname-btn">修改</button>
-    </div>
-    <div class="form-container">
-        <label for="password">密码</label>
-        <input type="password" id="password" value="********" readonly>
-        <button id="edit-password-btn">修改</button>
-    </div>
-    <div class="form-container">
-        <label for="register-time">注册时间</label>
-        <div class="info-value">{{ user.register_time.strftime('%Y-%m-%d %H:%M:%S') }}</div>
-    </div>
-    <div class="form-container">
-        <button id="delete-account-btn" class="delete-btn">注销账户</button>
+    <div class="profile-container">
+        <h2 class="profile-title">账户安全</h2>
+        <div class="profile-content">
+            <div class="user-profile-info">
+                <!-- 昵称 -->
+                <div class="info-item">
+                    <p class="info-label">昵称</p>
+                    <div class="info-value account-security-value">{{ current_user.nickname }}</div>
+                </div>
+                <!-- 密码 -->
+                <div class="info-item">
+                    <p class="info-label">密码</p>
+                    <div class="info-value account-security-value">********</div>
+                </div>
+                <!-- 注册时间 -->
+                <div class="info-item">
+                    <p class="info-label">注册时间</p>
+                    <div class="info-value account-security-value">{{ user.register_time.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+                </div>
+                <!-- 注销按钮 -->
+                <div class="info-item">
+                    <button id="delete-account-btn" class="delete-btn">注销账户</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- 修改昵称的模态框 -->
@@ -76,7 +84,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        document.getElementById('nickname').value = newNickname;
+                        document.querySelector('.info-item:nth-child(1) .info-value').textContent = newNickname;
                         showNotification(data.message, 'success');
                     } else {
                         showNotification(data.message, 'error');

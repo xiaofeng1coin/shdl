@@ -445,3 +445,31 @@ input[type="url"], input[type="text"] {
     padding: 10px 15px;
     cursor: pointer;
 }
+
+.custom-input-container input {
+    width: 100%;
+    max-width: 150px;
+    padding: 8px;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.half-width {
+    width: 50%; /* 或者固定宽度，如 150px */
+    margin: auto; /* 居中对齐 */
+}
+
+.account-security-value {
+        width: 25%; /* 进一步缩短宽度，变为原来的 1/4 */
+        padding: 8px;
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        height: 38px;
+        line-height: 1.5;
+        text-align: center;
+        box-sizing: border-box;
+    }
