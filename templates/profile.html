@@ -5,7 +5,7 @@
         <div class="profile-content">
             <div class="avatar-container">
                 <label for="avatar-upload" class="avatar-preview">
-                    <img src="{{ url_for('static', filename='avatar.jpg') }}" alt="Avatar" class="avatar-img">
+                    <img src="{{ url_for('static', filename=current_user.avatar) }}" alt="Avatar" class="avatar-img">
                     <span class="upload-label">点击更换</span>
                 </label>
                 <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
@@ -96,6 +96,30 @@
     </div>
 
     <script>
+        document.getElementById('avatar-upload').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const formData = new FormData();
+            formData.append('avatar', file);
+
+            fetch('/upload_avatar', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.avatar_url) {
+                    document.querySelector('.avatar-img').src = data.avatar_url;
+                    showNotification('头像已更新', 'success');
+                } else {
+                    showNotification('更新失败，请重试', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('发生错误，请稍后再试', 'error');
+            });
+        });
+
         document.getElementById('timezone-select').addEventListener('change', function() {
             const selectedTimezone = this.value;
             fetch('/update_timezone', {

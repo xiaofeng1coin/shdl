@@ -12,6 +12,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['UPLOAD_FOLDER'] = 'static/uploads'  # 添加头像上传目录
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}  # 允许的文件扩展名
 
 # 初始化组件
 db.init_app(app)
@@ -20,13 +22,15 @@ login_manager.init_app(app)
 with app.app_context():
     db.create_all()
 
+# 检查文件扩展名是否允许
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 @app.route('/')
 def home():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     return redirect(url_for('login'))
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -42,7 +46,6 @@ def login():
         return jsonify({"error": "用户名密码错误"})
     return render_template('login.html')
 
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -56,13 +59,11 @@ def register():
         return jsonify({"redirect": url_for('login')})
     return render_template('register.html')
 
-
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('login'))
-
 
 @app.route('/index')
 @login_required
@@ -99,7 +100,6 @@ def index():
                            link_count=len(links),
                            recent_links=links)
 
-
 @app.route('/links', methods=['GET', 'POST'])
 @login_required
 def links():
@@ -126,7 +126,6 @@ def links():
     base_url = request.host_url
     return render_template('links.html', links=links, base_url=base_url)
 
-
 @app.route('/<short_code>')
 def redirect_short_url(short_code):
     link = Link.query.filter_by(short_code=short_code).first()
@@ -136,13 +135,11 @@ def redirect_short_url(short_code):
         return redirect(link.original_url)
     return 'Link not found', 404
 
-
 @app.route('/stats/<short_code>')
 @login_required
 def link_stats(short_code):
     link = Link.query.filter_by(short_code=short_code).first()
     return render_template('stats.html', link=link)
-
 
 @app.route('/profile')
 @login_required
@@ -153,7 +150,6 @@ def profile():
                            total_links=total_links,
                            total_clicks=total_clicks,
                            user=current_user)
-
 
 @app.route('/update_timezone', methods=['POST'])
 @login_required
@@ -166,6 +162,27 @@ def update_timezone():
         return jsonify({"success": True})
     return jsonify({"success": False})
 
+
+@app.route('/upload_avatar', methods=['POST'])
+@login_required
+def upload_avatar():
+    if 'avatar' not in request.files:
+        return jsonify({"error": "未上传文件"}), 400
+    file = request.files['avatar']
+    if file.filename == '':
+        return jsonify({"error": "未选择文件"}), 400
+    if file and allowed_file(file.filename):
+        # 使用正斜杠（/）确保路径正确
+        filename = f"user_{current_user.id}_avatar.{file.filename.rsplit('.', 1)[1].lower()}"
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        # 保存相对路径到数据库，确保路径使用正斜杠
+        relative_path = os.path.join('uploads', filename).replace("\\", "/")  # 替换反斜杠为正斜杠
+        current_user.avatar = relative_path
+        db.session.commit()
+
+        return jsonify({"avatar_url": url_for('static', filename=relative_path)})
+    return jsonify({"error": "文件格式不支持"}), 400
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8462)

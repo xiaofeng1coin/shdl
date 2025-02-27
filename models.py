@@ -8,7 +8,8 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100))
     register_time = db.Column(db.DateTime, default=db.func.now())
-    timezone = db.Column(db.String(50), default="UTC")  # 添加时区字段
+    timezone = db.Column(db.String(50), default="UTC")
+    avatar = db.Column(db.String(200), default="avatar.jpg")  # 默认头像路径
     links = db.relationship('Link', backref='user', lazy=True)
 
 class Link(db.Model):
