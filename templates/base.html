@@ -81,7 +81,7 @@
                 <a href="#" class="dropdown-toggle" onclick="toggleDropdown(this)">我的账户</a>
                 <div class="dropdown-menu">
                     <a href="{{ url_for('profile') }}">个人信息</a>
-                    <a href="#">账户安全</a>
+                    <a href="{{ url_for('account_security') }}">账户安全</a> <!-- 修改这里 -->
                 </div>
             </div>
             <div class="dropdown">

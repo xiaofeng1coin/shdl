@@ -1,0 +1,129 @@
+{% extends "base.html" %}  <!-- 确保继承了 base.html -->
+{% block content %}
+    <h2>账户安全</h2>
+    <div class="form-container">
+        <label for="username">用户名</label>
+        <input type="text" id="username" value="{{ user.username }}" readonly>
+        <button id="edit-username-btn">修改</button>
+    </div>
+    <div class="form-container">
+        <label for="password">密码</label>
+        <input type="password" id="password" value="********" readonly>
+        <button id="edit-password-btn">修改</button>
+    </div>
+    <div class="form-container">
+        <label for="register-time">注册时间</label>
+        <div class="info-value">{{ user.register_time.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+    </div>
+
+    <!-- 修改用户名的模态框 -->
+    <div id="username-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">新用户名</div>
+            <input type="text" id="new-username" placeholder="请输入新的用户名">
+            <div class="modal-footer">
+                <button id="confirm-username-btn">确定</button>
+                <button id="cancel-username-btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改密码的模态框 -->
+    <div id="password-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">修改密码</div>
+            <input type="password" id="new-password" placeholder="请输入新密码">
+            <input type="password" id="confirm-password" placeholder="请确认新密码">
+            <div class="modal-footer">
+                <button id="confirm-password-btn">确定</button>
+                <button id="cancel-password-btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提示信息 -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // 修改用户名
+        document.getElementById('edit-username-btn').addEventListener('click', function() {
+            document.getElementById('username-modal').style.display = 'block';
+        });
+
+        document.getElementById('confirm-username-btn').addEventListener('click', function() {
+            const newUsername = document.getElementById('new-username').value;
+            if (newUsername) {
+                fetch('/update_username', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `new_username=${newUsername}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('username').value = newUsername;
+                        showNotification(data.message, 'success');
+                    } else {
+                        showNotification(data.message, 'error');
+                    }
+                    document.getElementById('username-modal').style.display = 'none';
+                });
+            } else {
+                showNotification('新用户名不能为空', 'error');
+            }
+        });
+
+        document.getElementById('cancel-username-btn').addEventListener('click', function() {
+            document.getElementById('username-modal').style.display = 'none';
+        });
+
+        // 修改密码
+        document.getElementById('edit-password-btn').addEventListener('click', function() {
+        document.getElementById('password-modal').style.display = 'block';
+    });
+
+    document.getElementById('confirm-password-btn').addEventListener('click', function() {
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+        if (newPassword && newPassword === confirmPassword) {
+            fetch('/update_password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `new_password=${newPassword}&confirm_password=${confirmPassword}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    // 自动跳转到登录页面
+                    setTimeout(() => {
+                        window.location.href = "{{ url_for('login') }}";
+                    }, 2000);  // 2秒后跳转
+                } else {
+                    showNotification(data.message, 'error');
+                }
+                document.getElementById('password-modal').style.display = 'none';
+            });
+        } else {
+            showNotification('两次输入的密码不一致', 'error');
+        }
+    });
+
+    document.getElementById('cancel-password-btn').addEventListener('click', function() {
+        document.getElementById('password-modal').style.display = 'none';
+    });
+
+    // 提示信息显示函数
+    function showNotification(message, type) {
+        const notification = document.getElementById('notification');
+        notification.innerText = message;
+        notification.className = `notification ${type}`;
+        notification.style.opacity = 1;
+        notification.style.display = 'block';
+        setTimeout(() => {
+            notification.style.opacity = 0;
+            setTimeout(() => notification.style.display = 'none', 500);
+        }, 3000);
+    }
+    </script>
+{% endblock %}  <!-- 确保正确关闭 block -->

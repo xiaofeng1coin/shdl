@@ -184,5 +184,42 @@ def upload_avatar():
         return jsonify({"avatar_url": url_for('static', filename=relative_path)})
     return jsonify({"error": "文件格式不支持"}), 400
 
+@app.route('/account_security')
+@login_required
+def account_security():
+    return render_template('account_security.html', user=current_user)
+
+@app.route('/update_username', methods=['POST'])
+@login_required
+def update_username():
+    new_username = request.form.get('new_username')
+    if not new_username:
+        return jsonify({"success": False, "message": "用户名不能为空"})
+    if User.query.filter_by(username=new_username).first():
+        return jsonify({"success": False, "message": "用户名已存在"})
+    current_user.username = new_username
+    db.session.commit()
+    return jsonify({"success": True, "message": "用户名更新成功"})
+
+
+@app.route('/update_password', methods=['POST'])
+@login_required
+def update_password():
+    new_password = request.form.get('new_password')
+    confirm_password = request.form.get('confirm_password')
+    if not new_password or not confirm_password:
+        return jsonify({"success": False, "message": "密码不能为空"})
+    if new_password != confirm_password:
+        return jsonify({"success": False, "message": "两次输入的密码不一致"})
+
+    # 更新密码
+    current_user.password = new_password
+    db.session.commit()
+
+    # 自动登出用户
+    logout_user()
+
+    return jsonify({"success": True, "message": "密码更新成功，请重新登录"})
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8462)
