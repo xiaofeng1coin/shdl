@@ -71,3 +71,25 @@
 .security-notification.error {
     background-color: #F44336; /* 红色，表示错误 */
 }
+
+/* 修改输入框的默认样式和高亮样式 */
+/* 修改输入框的默认样式和高亮样式 */
+.swal2-input {
+    border: 1px solid #ccc; /* 默认边框颜色 */
+    border-radius: 4px; /* 圆角边框 */
+    padding: 8px; /* 内边距 */
+    width: calc(100% - 16px); /* 根据内边距调整宽度 */
+    box-sizing: border-box; /* 确保边框和内边距包含在宽度内 */
+}
+
+/* 修改密码输入框的左右边框加粗 */
+#new-password, #confirm-password {
+    border-left-width: 2px; /* 左边框加粗 */
+    border-right-width: 2px; /* 右边框加粗 */
+}
+
+.swal2-input:focus {
+    outline: none !important; /* 取消默认的蓝色边框 */
+    border-color: #4C56AFFF !important; /* 高亮时的边框颜色（绿色） */
+    box-shadow: 0 0 0 1px #4C56AFFF !important; /* 可选：添加轻微的阴影效果 */
+}

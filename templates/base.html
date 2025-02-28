@@ -2,17 +2,17 @@
 <html>
 <head>
     <title>Shortener</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="/static/links.css"> <!-- 新增对 links.css 的引用 -->
-    <link rel="stylesheet" href="/static/profile.css"> <!-- 引入个人信息页面的独立样式 -->
-    <link rel="stylesheet" href="/static/account_security.css"> <!-- 引入账户安全页面的独立样式 -->
-    <link rel="stylesheet" href="/static/dashboard.css"> <!-- 引入首页仪表盘页面的独立样式 -->
-    <link rel="stylesheet" href="/static/auth.css"> <!-- 引入登录和注册的认证样式 -->
-    <link rel="stylesheet" href="/static/stats.css"> <!-- 新增引入 stats.css -->
-    <link rel="stylesheet" href="/static/navbar.css"> <!-- 引入新的 navbar.css -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/links.css"> <!-- 新增对 links.css 的引用 -->
+    <link rel="stylesheet" href="/static/css/profile.css"> <!-- 引入个人信息页面的独立样式 -->
+    <link rel="stylesheet" href="/static/css/account_security.css"> <!-- 引入账户安全页面的独立样式 -->
+    <link rel="stylesheet" href="/static/css/dashboard.css"> <!-- 引入首页仪表盘页面的独立样式 -->
+    <link rel="stylesheet" href="/static/css/auth.css"> <!-- 引入登录和注册的认证样式 -->
+    <link rel="stylesheet" href="/static/css/stats.css"> <!-- 新增引入 stats.css -->
+    <link rel="stylesheet" href="/static/css/navbar.css"> <!-- 引入新的 navbar.css -->
 </head>
 <body>
-    <div class="container">
+    <div class="navbar-container">
         <div class="navbar-sidebar">
             <div class="navbar-brand">
                 <i class="fa fa-link"></i>
@@ -40,7 +40,7 @@
             </div>
             <a href="{{ url_for('logout') }}">退出账户</a>
         </div>
-        <div class="content">
+        <div class="navbar-content">
             {% block content %}{% endblock %}
         </div>
     </div>

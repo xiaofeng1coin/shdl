@@ -1,6 +1,29 @@
 /* dashboard.css */
 .dashboard-container {
     padding: 20px;
+    user-select: none; /* 禁止文本选择 */
+}
+
+.dashboard-container * {
+    pointer-events: none; /* 禁止鼠标交互 */
+}
+
+.dashboard-container input,
+.dashboard-container select,
+.dashboard-container button,
+.dashboard-container a {
+    pointer-events: auto; /* 允许输入框、按钮和链接正常交互 */
+}
+
+.dashboard-user-info,
+.dashboard-generation-stats,
+.dashboard-update-time,
+.dashboard-recent-links {
+    pointer-events: none; /* 禁止这些区域的鼠标交互 */
+}
+
+.dashboard-create-link-btn-container a {
+    pointer-events: auto; /* 允许按钮正常交互 */
 }
 
 .dashboard-user-info {

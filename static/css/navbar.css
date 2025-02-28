@@ -58,6 +58,7 @@
     padding: 10px 15px;
     text-align: center;
     position: relative;
+    font-size: 16px; /* 一级菜单字号 */
 }
 
 .navbar-dropdown-toggle::after {
@@ -77,6 +78,8 @@
     padding: 0; /* 移除内边距 */
     text-align: center;
     margin-top: -1px; /* 与一级菜单的距离一致 */
+    margin-left: 25px; /* 二级菜单向右错开25px，比之前更明显 */
+    width: calc(100% - 25px); /* 保证二级菜单宽度适应 */
 }
 
 .navbar-dropdown-menu a {
@@ -87,6 +90,7 @@
     border-top: 1px solid #2f353a; /* 添加分隔线，与一级菜单的间距一致 */
     background-color: transparent !important; /* 确保默认状态透明 */
     transition: background-color 0.3s; /* 添加过渡效果 */
+    font-size: 13px; /* 二级菜单字号更小 */
 }
 
 .navbar-dropdown-menu a:hover {
@@ -96,4 +100,12 @@
 /* 显示下拉菜单 */
 .navbar-dropdown.active .navbar-dropdown-menu {
     display: block;
+}
+
+.navbar-container {
+    display: flex;
+}
+.navbar-content {
+    flex: 1;
+    padding: 20px;
 }
