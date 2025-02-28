@@ -1,66 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
-    <div class="profile-container">
-        <h2 class="profile-title">账户安全</h2>
-        <div class="profile-content">
-            <div class="user-profile-info">
-                <!-- 昵称 -->
-                <div class="info-item">
-                    <p class="info-label">昵称</p>
-                    <div class="info-value account-security-value">{{ current_user.nickname }}</div>
-                </div>
-                <!-- 密码 -->
-                <div class="info-item">
-                    <p class="info-label">密码</p>
-                    <div class="info-value account-security-value">********</div>
-                </div>
-                <!-- 注册时间 -->
-                <div class="info-item">
-                    <p class="info-label">注册时间</p>
-                    <div class="info-value account-security-value">{{ user.register_time.strftime('%Y-%m-%d %H:%M:%S') }}</div>
-                </div>
-                <!-- 注销按钮 -->
-                <div class="info-item">
-                    <button id="delete-account-btn" class="delete-btn">注销账户</button>
-                </div>
-            </div>
+    <h2 class="account-security-title">账户安全</h2>
+    <div class="account-security-container">
+        <div class="account-security-item">
+            <label for="nickname">账户昵称</label>
+            <div class="account-security-value">{{ user.nickname }}</div>
+            <button id="edit-nickname-btn" class="account-security-btn">修改</button>
         </div>
-    </div>
-
-    <!-- 修改昵称的模态框 -->
-    <div id="nickname-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">新昵称</div>
-            <input type="text" id="new-nickname" placeholder="请输入新的昵称">
-            <div class="modal-footer">
-                <button id="confirm-nickname-btn">确定</button>
-                <button id="cancel-nickname-btn">取消</button>
-            </div>
+        <div class="account-security-item">
+            <label for="password">账户密码</label>
+            <div class="account-security-value">********</div>
+            <button id="edit-password-btn" class="account-security-btn">修改</button>
         </div>
-    </div>
-
-    <!-- 修改密码的模态框 -->
-    <div id="password-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">修改密码</div>
-            <input type="password" id="new-password" placeholder="请输入新密码">
-            <input type="password" id="confirm-password" placeholder="请确认新密码">
-            <div class="modal-footer">
-                <button id="confirm-password-btn">确定</button>
-                <button id="cancel-password-btn">取消</button>
-            </div>
+        <div class="account-security-item">
+            <label for="register-time">注册时间</label>
+            <div class="account-security-value">{{ user.register_time.strftime('%Y-%m-%d %H:%M:%S') }}</div>
         </div>
-    </div>
-
-    <!-- 注销账户的模态框 -->
-    <div id="delete-account-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">确认注销</div>
-            <p>确定要注销账户吗？注销后将无法使用该账户登录。</p>
-            <div class="modal-footer">
-                <button id="confirm-delete-btn">确认注销</button>
-                <button id="cancel-delete-btn">取消</button>
-            </div>
+        <div class="account-security-item">
+            <button id="delete-account-btn" class="account-security-btn delete-btn">注销账户</button>
         </div>
     </div>
 
@@ -68,100 +25,124 @@
     <div id="notification" class="notification"></div>
 
     <script>
+        // 引入 SweetAlert2 的 JavaScript 文件
+        document.addEventListener('DOMContentLoaded', function() {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11.1.4/dist/sweetalert2.all.min.js';
+            document.body.appendChild(script);
+        });
+
         // 修改昵称逻辑
         document.getElementById('edit-nickname-btn').addEventListener('click', function() {
-            document.getElementById('nickname-modal').style.display = 'block';
-        });
-
-        document.getElementById('confirm-nickname-btn').addEventListener('click', function() {
-            const newNickname = document.getElementById('new-nickname').value;
-            if (newNickname) {
-                fetch('/update_nickname', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `new_nickname=${newNickname}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.querySelector('.info-item:nth-child(1) .info-value').textContent = newNickname;
-                        showNotification(data.message, 'success');
-                    } else {
-                        showNotification(data.message, 'error');
+            Swal.fire({
+                title: '<span style="font-size: 16px;">修改昵称</span>',
+                html: `
+                    <div style="text-align: center;">
+                        <input type="text" id="new-nickname" placeholder="请输入新的昵称" class="swal2-input" style="display: inline-block; text-align: center; font-size: 14px;">
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                preConfirm: () => {
+                    const newNickname = document.getElementById('new-nickname').value;
+                    if (!newNickname) {
+                        Swal.showValidationMessage('<span style="font-size: 14px;">新昵称不能为空</span>');
                     }
-                    document.getElementById('nickname-modal').style.display = 'none';
-                });
-            } else {
-                showNotification('新昵称不能为空', 'error');
-            }
-        });
-
-        document.getElementById('cancel-nickname-btn').addEventListener('click', function() {
-            document.getElementById('nickname-modal').style.display = 'none';
+                    return newNickname;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/update_nickname', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `new_nickname=${result.value}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.querySelector('.account-security-value').innerText = result.value;
+                            showNotification(data.message, 'success');
+                        } else {
+                            showNotification(data.message, 'error');
+                        }
+                    });
+                }
+            });
         });
 
         // 修改密码逻辑
         document.getElementById('edit-password-btn').addEventListener('click', function() {
-            document.getElementById('password-modal').style.display = 'block';
-        });
-
-        document.getElementById('confirm-password-btn').addEventListener('click', function() {
-            const newPassword = document.getElementById('new-password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-            if (newPassword && newPassword === confirmPassword) {
-                fetch('/update_password', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `new_password=${newPassword}&confirm_password=${confirmPassword}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showNotification(data.message, 'success');
-                        // 自动跳转到登录页面
-                        setTimeout(() => {
-                            window.location.href = "{{ url_for('login') }}";
-                        }, 2000);  // 2秒后跳转
-                    } else {
-                        showNotification(data.message, 'error');
+            Swal.fire({
+                title: '<span style="font-size: 16px;">修改密码</span>',
+                html: `
+                    <div style="text-align: center;">
+                        <input type="password" id="new-password" placeholder="请输入新密码" class="swal2-input" style="display: inline-block; font-size: 14px;">
+                        <input type="password" id="confirm-password" placeholder="再次输入新密码" class="swal2-input" style="display: inline-block; font-size: 14px;">
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                preConfirm: () => {
+                    const newPassword = document.getElementById('new-password').value;
+                    const confirmPassword = document.getElementById('confirm-password').value;
+                    if (!newPassword || !confirmPassword) {
+                        Swal.showValidationMessage('<span style="font-size: 14px;">密码不能为空</span>');
+                    } else if (newPassword !== confirmPassword) {
+                        Swal.showValidationMessage('<span style="font-size: 14px;">两次输入的密码不一致</span>');
                     }
-                    document.getElementById('password-modal').style.display = 'none';
-                });
-            } else {
-                showNotification('两次输入的密码不一致', 'error');
-            }
-        });
-
-        document.getElementById('cancel-password-btn').addEventListener('click', function() {
-            document.getElementById('password-modal').style.display = 'none';
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const newPassword = document.getElementById('new-password').value;
+                    fetch('/update_password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `new_password=${newPassword}&confirm_password=${newPassword}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotification(data.message, 'success');
+                            setTimeout(() => {
+                                window.location.href = "{{ url_for('login') }}";
+                            }, 2000);
+                        } else {
+                            showNotification(data.message, 'error');
+                        }
+                    });
+                }
+            });
         });
 
         // 注销账户逻辑
         document.getElementById('delete-account-btn').addEventListener('click', function() {
-            document.getElementById('delete-account-modal').style.display = 'block';
-        });
-
-        document.getElementById('confirm-delete-btn').addEventListener('click', function() {
-            fetch('/delete_account', {
-                method: 'POST'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification(data.message, 'success');
-                    // 自动跳转到登录页面
-                    setTimeout(() => {
-                        window.location.href = "{{ url_for('login') }}";
-                    }, 2000);  // 2秒后跳转
-                } else {
-                    showNotification(data.message, 'error');
+            Swal.fire({
+                title: '确认注销',
+                text: '确定要注销账户吗？注销后将无法使用该账户登录。',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '确认注销',
+                cancelButtonText: '取消'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/delete_account', {
+                        method: 'POST'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotification(data.message, 'success');
+                            setTimeout(() => {
+                                window.location.href = "{{ url_for('login') }}";
+                            }, 2000);
+                        } else {
+                            showNotification(data.message, 'error');
+                        }
+                    });
                 }
-                document.getElementById('delete-account-modal').style.display = 'none';
             });
-        });
-
-        document.getElementById('cancel-delete-btn').addEventListener('click', function() {
-            document.getElementById('delete-account-modal').style.display = 'none';
         });
 
         // 提示信息显示函数

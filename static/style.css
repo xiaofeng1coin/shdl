@@ -446,30 +446,56 @@ input[type="url"], input[type="text"] {
     cursor: pointer;
 }
 
-.custom-input-container input {
-    width: 100%;
-    max-width: 150px;
-    padding: 8px;
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    text-align: center;
-    box-sizing: border-box;
+/* 账户安全页面样式 */
+.account-security-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* 增大组件之间的间距 */
+    padding: 0; /* 移除内边距 */
+    background-color: transparent; /* 移除背景颜色 */
+    border: none; /* 移除边框 */
+    box-shadow: none; /* 移除阴影 */
 }
 
-.half-width {
-    width: 50%; /* 或者固定宽度，如 150px */
-    margin: auto; /* 居中对齐 */
+.account-security-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px; /* 在标签和展示框之间添加间距 */
+}
+
+.account-security-item label {
+    font-weight: bold;
+    margin-right: 10px;
+    width: 120px; /* 保持标签宽度一致 */
+    text-align: right;
 }
 
 .account-security-value {
-        width: 25%; /* 进一步缩短宽度，变为原来的 1/4 */
-        padding: 8px;
-        background-color: #f0f0f0;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        height: 38px;
-        line-height: 1.5;
-        text-align: center;
-        box-sizing: border-box;
-    }
+    flex: 0 0 25%; /* 设置宽度为页面的四分之一 */
+    background-color: #f0f0f0;
+    padding: 8px;
+    border-radius: 4px;
+    text-align: center;
+    margin-right: 10px;
+}
+
+.account-security-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.account-security-btn.delete-btn {
+    background-color: #d9534f;
+}
+
+/* 账户安全页面标题样式 */
+.account-security-title {
+    font-size: 1.25rem; /* 调整字号大小 */
+    font-weight: bold; /* 保持加粗效果 */
+    margin-bottom: 20px; /* 保持标题与内容之间的间距 */
+}
