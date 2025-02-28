@@ -16,20 +16,54 @@
 .links-table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed; /* 固定表格布局 */
 }
 
+/* 公共单元格样式 */
 .links-table th,
 .links-table td {
     border: 1px solid #ddd;
     padding: 8px;
-    text-align: left;
+    text-align: center; /* 默认居中对齐 */
+    white-space: nowrap; /* 防止内容换行 */
+    overflow: hidden; /* 隐藏超出部分 */
+    text-overflow: ellipsis; /* 显示省略号 */
+    height: 40px; /* 固定行高 */
+    vertical-align: middle; /* 垂直居中对齐 */
 }
 
+/* 独立列样式 */
+.col-short-link {
+    width: 150px; /* 固定宽度 */
+}
+
+.col-original-url {
+    width: 150px; /* 固定宽度 */
+}
+
+.col-custom-suffix {
+    width: 80px; /* 固定宽度 */
+}
+
+.col-clicks {
+    width: 30px; /* 固定宽度 */
+}
+
+.col-created-at {
+    width: 80px; /* 固定宽度 */
+}
+
+.col-actions {
+    width: 180px; /* 固定宽度 */
+}
+
+/* 表头样式 */
 .links-table th {
     background-color: #f0f0f0;
     font-weight: bold;
 }
 
+/* 链接样式 */
 .links-short-url {
     color: #4CAF50;
     text-decoration: none;
@@ -39,7 +73,10 @@
     text-decoration: underline;
 }
 
+/* 统一按钮样式 */
 .links-copy-btn,
+.links-edit-btn,
+.links-save-btn,
 .links-stats-btn,
 .links-delete-btn {
     display: inline-block;
@@ -47,7 +84,19 @@
     background: #4CAF50;
     color: white;
     text-decoration: none;
+    border: 1px solid #333; /* 添加深色边框 */
     border-radius: 4px;
-    margin-right: 10px;
     cursor: pointer;
+    margin: 0 5px; /* 为按钮添加外边距 */
+    vertical-align: middle; /* 确保按钮在同一水平线上 */
+}
+
+/* 输入框样式 */
+.edit-url, .edit-suffix {
+    padding: 5px; /* 添加内边距 */
+    border: 1px solid #ccc; /* 添加边框 */
+    border-radius: 4px; /* 添加圆角 */
+    box-sizing: border-box; /* 确保宽度计算包括内边距 */
+    width: calc(100% - 20px); /* 输入框宽度为列宽减去20px */
+    height: 28px; /* 输入框高度 */
 }

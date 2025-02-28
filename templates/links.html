@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1 style="font-size: 24px;">管理短链</h1> <!-- 将字号调小 -->
+    <h1 style="font-size: 24px;">管理短链</h1>
     <form method="POST" class="links-form">
         <input type="url" name="original_url" placeholder="长链接" required>
         <input type="text" name="custom_suffix" placeholder="自定义后缀（可选）">
@@ -9,59 +9,128 @@
 
     <table class="links-table">
         <tr>
-            <th>短链接</th>
-            <th>原始链接</th>
-            <th>点击量</th>
-            <th>创建日期</th>
-            <th>操作</th>
+            <th class="col-short-link">短链接</th>
+            <th class="col-original-url">原始链接</th>
+            <th class="col-custom-suffix">自定义后缀</th>
+            <th class="col-clicks">点击量</th>
+            <th class="col-created-at">创建日期</th>
+            <th class="col-actions">操作</th>
         </tr>
         {% for link in links %}
         <tr data-short-code="{{ link.short_code }}">
-    <td><a href="{{ base_url }}{{ link.short_code }}" class="links-short-url">{{ base_url }}{{ link.short_code }}</a></td>
-    <td>{{ link.original_url }}</td>
-    <td>{{ link.clicks }}</td>
-    <td>{{ link.created_at.strftime('%Y-%m-%d') }}</td>
-    <td>
-        <button onclick="copyToClipboard('{{ base_url }}{{ link.short_code }}')" class="links-copy-btn">复制</button>
-        <a href="{{ url_for('link_stats', short_code=link.short_code) }}" class="links-stats-btn">统计</a>
-        <button onclick="deleteLink('{{ link.short_code }}')" class="links-delete-btn">删除</button>
-    </td>
-</tr>
+            <td class="col-short-link"><a href="{{ base_url }}{{ link.short_code }}" class="links-short-url">{{ base_url }}{{ link.short_code }}</a></td>
+            <td class="col-original-url" data-url="{{ link.original_url }}">{{ link.original_url }}</td>
+            <td class="col-custom-suffix" data-suffix="{{ link.short_code }}">{{ link.short_code }}</td>
+            <td class="col-clicks">{{ link.clicks }}</td>
+            <td class="col-created-at">{{ link.created_at.strftime('%Y-%m-%d') }}</td>
+            <td class="col-actions">
+    <button class="links-edit-btn" onclick="editLink('{{ link.short_code }}')">编辑</button>
+    <button class="links-save-btn" onclick="saveLink('{{ link.short_code }}')" style="display: none;">保存</button>
+    <button class="links-copy-btn" onclick="copyToClipboard('{{ base_url }}{{ link.short_code }}')">复制</button>
+    <button class="links-stats-btn" onclick="location.href='{{ url_for('link_stats', short_code=link.short_code) }}'">统计</button>
+    <button class="links-delete-btn" onclick="deleteLink('{{ link.short_code }}')">删除</button>
+</td>
+        </tr>
         {% endfor %}
     </table>
     <script>
-    function copyToClipboard(text) {
-        navigator.clipboard.writeText(text);
-        alert('已复制: ' + text);
-    }
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text);
+            alert('已复制: ' + text);
+        }
 
-    function deleteLink(shortCode) {
-    if (confirm("确定要删除这个短链接吗？")) {
-        fetch("{{ url_for('delete_link') }}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ short_code: shortCode })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('短链接已删除');
-                // 动态移除对应的行
-                const row = document.querySelector(`tr[data-short-code="${shortCode}"]`);
-                if (row) {
-                    row.remove();
-                }
-            } else {
-                alert('删除失败: ' + data.message);
+        function deleteLink(shortCode) {
+            if (confirm("确定要删除这个短链接吗？")) {
+                fetch("{{ url_for('delete_link') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ short_code: shortCode })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('短链接已删除');
+                        const row = document.querySelector(`tr[data-short-code="${shortCode}"]`);
+                        if (row) {
+                            row.remove();
+                        }
+                    } else {
+                        alert('删除失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('删除失败');
+                });
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('删除失败');
-        });
-    }
-}
+        }
+
+        function editLink(shortCode) {
+            const row = document.querySelector(`tr[data-short-code="${shortCode}"]`);
+            const originalUrlCell = row.querySelector('.col-original-url');
+            const customSuffixCell = row.querySelector('.col-custom-suffix');
+            const editBtn = row.querySelector('.links-edit-btn');
+            const saveBtn = row.querySelector('.links-save-btn');
+
+            // 将显示内容转换为输入框
+            originalUrlCell.innerHTML = `<input type="url" class="edit-url" value="${originalUrlCell.getAttribute('data-url')}">`;
+            customSuffixCell.innerHTML = `<input type="text" class="edit-suffix" value="${customSuffixCell.getAttribute('data-suffix')}">`;
+
+            // 动态设置输入框宽度为列宽的90%
+            const originalUrlInput = originalUrlCell.querySelector('.edit-url');
+            const customSuffixInput = customSuffixCell.querySelector('.edit-suffix');
+            originalUrlInput.style.width = `${originalUrlCell.offsetWidth * 0.9}px`;
+            customSuffixInput.style.width = `${customSuffixCell.offsetWidth * 0.9}px`;
+
+            // 隐藏编辑按钮，显示保存按钮
+            editBtn.style.display = 'none';
+            saveBtn.style.display = 'inline-block';
+        }
+
+        function saveLink(shortCode) {
+            const row = document.querySelector(`tr[data-short-code="${shortCode}"]`);
+            const originalUrlCell = row.querySelector('.col-original-url');
+            const customSuffixCell = row.querySelector('.col-custom-suffix');
+            const editBtn = row.querySelector('.links-edit-btn');
+            const saveBtn = row.querySelector('.links-save-btn');
+            const newOriginalUrl = row.querySelector('.edit-url').value;
+            const newCustomSuffix = row.querySelector('.edit-suffix').value;
+
+            // 发起保存请求
+            fetch("{{ url_for('update_link') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    short_code: shortCode,
+                    original_url: newOriginalUrl,
+                    custom_suffix: newCustomSuffix
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('链接已更新');
+                    // 更新显示内容
+                    originalUrlCell.innerHTML = newOriginalUrl;
+                    customSuffixCell.innerHTML = newCustomSuffix;
+                    originalUrlCell.setAttribute('data-url', newOriginalUrl);
+                    customSuffixCell.setAttribute('data-suffix', newCustomSuffix);
+
+                    // 隐藏保存按钮，显示编辑按钮
+                    editBtn.style.display = 'inline-block';
+                    saveBtn.style.display = 'none';
+                } else {
+                    alert('更新失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('更新失败');
+            });
+        }
     </script>
 {% endblock %}

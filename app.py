@@ -261,5 +261,28 @@ def delete_link():
     else:
         return jsonify({"success": False, "message": "短链接不存在或您无权删除"})
 
+@app.route('/update_link', methods=['POST'])
+@login_required
+def update_link():
+    data = request.json
+    short_code = data.get('short_code')
+    new_original_url = data.get('original_url')
+    new_custom_suffix = data.get('custom_suffix')
+
+    link = Link.query.filter_by(short_code=short_code, user_id=current_user.id).first()
+    if not link:
+        return jsonify({"success": False, "message": "链接不存在或您无权修改"})
+
+    # 检查自定义后缀是否冲突
+    if new_custom_suffix != link.short_code and Link.query.filter_by(short_code=new_custom_suffix).first():
+        return jsonify({"success": False, "message": "自定义后缀已存在"})
+
+    # 更新链接信息
+    link.original_url = new_original_url
+    link.short_code = new_custom_suffix
+    db.session.commit()
+
+    return jsonify({"success": True, "message": "链接已更新"})
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8462)

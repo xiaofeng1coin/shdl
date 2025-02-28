@@ -2,14 +2,18 @@
 
 /* 导航栏主体样式 */
 .navbar-sidebar {
+    position: fixed; /* 固定导航栏位置 */
+    top: 0;
+    left: 0;
     width: 200px;
     background: #2f353a;
     color: #b7c0cd;
     padding: 20px 0;
-    height: 100vh;
+    height: 100vh; /* 高度为视口高度 */
     box-sizing: border-box;
-    overflow-y: auto;
+    overflow-y: auto; /* 允许垂直滚动 */
     text-align: center;
+    z-index: 1000; /* 确保导航栏在最上层 */
 }
 
 /* 导航栏品牌（标题）样式 */
@@ -105,7 +109,9 @@
 .navbar-container {
     display: flex;
 }
+
 .navbar-content {
     flex: 1;
     padding: 20px;
+    margin-left: 200px; /* 为内容区域添加与导航栏相同的宽度 */
 }
