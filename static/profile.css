@@ -124,3 +124,24 @@
     height: 38px;
     line-height: 1.5;
 }
+
+/* 新增 profile-notification 样式 */
+.profile-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    color: white;
+    z-index: 1000;
+    transition: opacity 0.5s ease;
+}
+
+.profile-notification.success {
+    background-color: #4CAF50; /* 绿色，表示成功 */
+}
+
+.profile-notification.error {
+    background-color: #F44336; /* 红色，表示错误 */
+}

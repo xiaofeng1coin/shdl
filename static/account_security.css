@@ -50,3 +50,24 @@
     font-weight: bold;
     margin-bottom: 20px;
 }
+
+/* 新增 security-notification 样式 */
+.security-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    color: white;
+    z-index: 1000;
+    transition: opacity 0.5s ease;
+}
+
+.security-notification.success {
+    background-color: #4CAF50; /* 绿色，表示成功 */
+}
+
+.security-notification.error {
+    background-color: #F44336; /* 红色，表示错误 */
+}

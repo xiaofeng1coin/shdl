@@ -89,7 +89,7 @@
     </div>
 
     <!-- 添加一个隐藏的通知区域 -->
-    <div id="notification" class="notification" style="display: none;">
+    <div id="notification" class="profile-notification" style="display: none;">
         <p id="notification-message"></p>
     </div>
 
@@ -149,7 +149,7 @@
             notification.style.display = 'block';
 
             // 根据类型设置通知的样式
-            notification.className = `notification ${type}`;
+            notification.className = `profile-notification ${type}`;
 
             // 5秒后自动隐藏通知
             setTimeout(() => {

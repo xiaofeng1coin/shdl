@@ -22,7 +22,7 @@
     </div>
 
     <!-- 提示信息 -->
-    <div id="notification" class="notification"></div>
+    <div id="notification" class="security-notification"></div>
 
     <script>
         // 引入 SweetAlert2 的 JavaScript 文件
@@ -149,7 +149,7 @@
         function showNotification(message, type) {
             const notification = document.getElementById('notification');
             notification.innerText = message;
-            notification.className = `notification ${type}`;
+            notification.className = `security-notification ${type}`;
             notification.style.opacity = 1;
             notification.style.display = 'block';
             setTimeout(() => {
