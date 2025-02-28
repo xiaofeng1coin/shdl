@@ -3,39 +3,37 @@
     <div class="profile-container">
         <h2 class="profile-title">个人信息</h2>
         <div class="profile-content">
-            <div class="avatar-container">
-                <label for="avatar-upload" class="avatar-preview">
+            <div class="profile-avatar-container">
+                <label for="avatar-upload" class="profile-avatar-preview">
                     <img src="{{ url_for('static', filename=current_user.avatar) }}" alt="Avatar" class="avatar-img">
-                    <span class="upload-label">点击更换</span>
+                    <span class="profile-upload-label">点击更换</span>
                 </label>
                 <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
             </div>
-            <div class="user-profile-info">
-                <div class="info-item left-item">
-                    <p class="info-label">昵称</p>  <!-- 修改为昵称 -->
-                    <div class="info-value">{{ current_user.nickname }}</div>  <!-- 修改为昵称 -->
+            <div class="profile-user-profile-info">
+                <div class="profile-info-item left-item">
+                    <p class="profile-info-label">昵称</p>
+                    <div class="profile-info-value">{{ current_user.nickname }}</div>
                 </div>
-                <div class="info-item right-item">
-                    <p class="info-label">注册时间</p>
-                    <div class="info-value">{{ current_user.register_time.strftime('%Y-%m-%d') }}</div>
+                <div class="profile-info-item right-item">
+                    <p class="profile-info-label">注册时间</p>
+                    <div class="profile-info-value">{{ current_user.register_time.strftime('%Y-%m-%d') }}</div>
                 </div>
-                <div class="info-item right-item">
-                    <p class="info-label">生成量</p>
-                    <div class="info-value">{{ total_links }} / 100</div>
+                <div class="profile-info-item right-item">
+                    <p class="profile-info-label">生成量</p>
+                    <div class="profile-info-value">{{ total_links }} / 100</div>
                 </div>
-                <div class="info-item right-item">
-                    <p class="info-label">用户类型</p>
-                    <div class="info-value">免费版</div>
+                <div class="profile-info-item right-item">
+                    <p class="profile-info-label">用户类型</p>
+                    <div class="profile-info-value">免费版</div>
                 </div>
-                <div class="info-item left-item">
-                    <p class="info-label">访问量</p>
-                    <div class="info-value">无限</div>
+                <div class="profile-info-item left-item">
+                    <p class="profile-info-label">访问量</p>
+                    <div class="profile-info-value">无限</div>
                 </div>
-                <!-- 新增时区选择框 -->
-                <div class="info-item left-item">
-                    <p class="info-label">时区</p>
-                    <select class="info-value timezone-select" id="timezone-select">
-                        <!-- 预定义的中文时区列表 -->
+                <div class="profile-info-item left-item">
+                    <p class="profile-info-label">时区</p>
+                    <select class="profile-info-value profile-timezone-select" id="timezone-select">
                         {% set timezones = [
                             {"value": "Asia/Shanghai", "name": "中国标准时间 (北京时间)"},
                             {"value": "Asia/Hong_Kong", "name": "香港时间"},

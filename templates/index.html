@@ -3,40 +3,40 @@
     <div class="dashboard-container">
         <div class="dashboard-bg"></div>
         <div class="dashboard-content">
-            <div class="user-info">
-                <div class="user-avatar">
-                    <img src="{{ url_for('static', filename=current_user.avatar) }}" alt="Avatar" class="avatar-img">
+            <div class="dashboard-user-info">
+                <div class="dashboard-user-avatar">
+                    <img src="{{ url_for('static', filename=current_user.avatar) }}" alt="Avatar" class="dashboard-avatar-img">
                 </div>
-                <div class="user-details">
-                    <span class="username">{{ current_user.nickname }}</span>  <!-- 显示昵称 -->
-                    <div class="register-time">注册时间：{{ current_user.register_time.strftime('%Y-%m-%d') }}</div>
+                <div class="dashboard-user-details">
+                    <span class="dashboard-username">{{ current_user.nickname }}</span>
+                    <div class="dashboard-register-time">注册时间：{{ current_user.register_time.strftime('%Y-%m-%d') }}</div>
                 </div>
-                <div class="create-link-btn-container">
-                    <a href="{{ url_for('links') }}" class="btn create-link-btn">创建新链接</a>
-                </div>
-            </div>
-            <div class="generation-stats" style="margin-left: auto; display: flex; justify-content: flex-end;">
-                <div class="stat">
-                    <span class="stat-title">历史生成总量</span>
-                    <span class="stat-value total-value">{{ total_links }}</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-title">本月生成量</span>
-                    <span class="stat-value monthly-value">{{ monthly_links }}</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-title">昨日生成量</span>
-                    <span class="stat-value yesterday-value">{{ yesterday_links }}</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-title">今日生成量</span>
-                    <span class="stat-value today-value">{{ today_links }}</span>
+                <div class="dashboard-create-link-btn-container">
+                    <a href="{{ url_for('links') }}" class="btn dashboard-create-link-btn">创建新链接</a>
                 </div>
             </div>
-            <div class="update-time">更新时间: {{ update_time }}</div>
-            <div class="recent-links">
+            <div class="dashboard-generation-stats" style="margin-left: auto; display: flex; justify-content: flex-end;">
+                <div class="dashboard-stat">
+                    <span class="dashboard-stat-title">历史生成总量</span>
+                    <span class="dashboard-stat-value dashboard-total-value">{{ total_links }}</span>
+                </div>
+                <div class="dashboard-stat">
+                    <span class="dashboard-stat-title">本月生成量</span>
+                    <span class="dashboard-stat-value dashboard-monthly-value">{{ monthly_links }}</span>
+                </div>
+                <div class="dashboard-stat">
+                    <span class="dashboard-stat-title">昨日生成量</span>
+                    <span class="dashboard-stat-value dashboard-yesterday-value">{{ yesterday_links }}</span>
+                </div>
+                <div class="dashboard-stat">
+                    <span class="dashboard-stat-title">今日生成量</span>
+                    <span class="dashboard-stat-value dashboard-today-value">{{ today_links }}</span>
+                </div>
+            </div>
+            <div class="dashboard-update-time">更新时间: {{ update_time }}</div>
+            <div class="dashboard-recent-links">
                 <h3>最近的链接</h3>
-                <table class="recent-links-table">
+                <table class="dashboard-recent-links-table">
                     <thead>
                         <tr>
                             <th>序号</th>
@@ -49,7 +49,7 @@
                         <tr>
                             <td>{{ loop.index }}</td>
                             <td>
-                                <a href="{{ url_for('link_stats', short_code=link.short_code) }}" class="link-url">
+                                <a href="{{ url_for('link_stats', short_code=link.short_code) }}" class="dashboard-link-url">
                                     {{ request.host_url }}{{ link.short_code }}
                                 </a>
                             </td>

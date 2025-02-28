@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1>管理链接</h1>
-    <form method="POST">
+    <h1 style="font-size: 24px;">管理短链</h1> <!-- 将字号调小 -->
+    <form method="POST" class="links-form">
         <input type="url" name="original_url" placeholder="长链接" required>
         <input type="text" name="custom_suffix" placeholder="自定义后缀（可选）">
-        <button type="submit" class="create-btn">创建</button>
+        <button type="submit" class="links-create-btn">创建</button>
     </form>
 
-    <table>
+    <table class="links-table">
         <tr>
             <th>短链接</th>
             <th>原始链接</th>
@@ -17,14 +17,13 @@
         </tr>
         {% for link in links %}
         <tr>
-            <td><a href="{{ base_url }}{{ link.short_code }}">{{ base_url }}{{ link.short_code }}</a></td>
+            <td><a href="{{ base_url }}{{ link.short_code }}" class="links-short-url">{{ base_url }}{{ link.short_code }}</a></td>
             <td>{{ link.original_url }}</td>
             <td>{{ link.clicks }}</td>
             <td>{{ link.created_at.strftime('%Y-%m-%d') }}</td>
             <td>
-                <!-- 统一改成类似统计按钮的样式 -->
-                <button onclick="copyToClipboard('{{ base_url }}{{ link.short_code }}')" class="btn stats-btn">复制</button>
-                <a href="{{ url_for('link_stats', short_code=link.short_code) }}" class="btn stats-btn">统计</a>
+                <button onclick="copyToClipboard('{{ base_url }}{{ link.short_code }}')" class="links-copy-btn">复制</button>
+                <a href="{{ url_for('link_stats', short_code=link.short_code) }}" class="links-stats-btn">统计</a>
             </td>
         </tr>
         {% endfor %}

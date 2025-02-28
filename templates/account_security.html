@@ -1,23 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
-    <h2 class="account-security-title">账户安全</h2>
-    <div class="account-security-container">
-        <div class="account-security-item">
+    <h2 class="security-title">账户安全</h2>
+    <div class="security-container">
+        <div class="security-item">
             <label for="nickname">账户昵称</label>
-            <div class="account-security-value">{{ user.nickname }}</div>
-            <button id="edit-nickname-btn" class="account-security-btn">修改</button>
+            <div class="security-value">{{ user.nickname }}</div>
+            <button id="edit-nickname-btn" class="security-btn">修改</button>
         </div>
-        <div class="account-security-item">
+        <div class="security-item">
             <label for="password">账户密码</label>
-            <div class="account-security-value">********</div>
-            <button id="edit-password-btn" class="account-security-btn">修改</button>
+            <div class="security-value">********</div>
+            <button id="edit-password-btn" class="security-btn">修改</button>
         </div>
-        <div class="account-security-item">
+        <div class="security-item">
             <label for="register-time">注册时间</label>
-            <div class="account-security-value">{{ user.register_time.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+            <div class="security-value">{{ user.register_time.strftime('%Y-%m-%d %H:%M:%S') }}</div>
         </div>
-        <div class="account-security-item">
-            <button id="delete-account-btn" class="account-security-btn delete-btn">注销账户</button>
+        <div class="security-item">
+            <button id="delete-account-btn" class="security-btn delete-btn">注销账户</button>
         </div>
     </div>
 
@@ -61,7 +61,7 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            document.querySelector('.account-security-value').innerText = result.value;
+                            document.querySelector('.security-value').innerText = result.value;
                             showNotification(data.message, 'success');
                         } else {
                             showNotification(data.message, 'error');

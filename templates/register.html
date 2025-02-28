@@ -3,6 +3,7 @@
 <head>
     <title>Register - Shortener</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/auth.css"> <!-- 引入共享的认证样式 -->
     <!-- 引入 SweetAlert2 的 CSS 文件 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.4/dist/sweetalert2.min.css">
     <script>
@@ -28,9 +29,9 @@
         <h1>用户注册</h1>
         <form method="POST" action="{{ url_for('register') }}" onsubmit="return validateForm(this);">
             <input type="text" name="account_name" placeholder="账户名" required>
-            <input type="text" name="nickname" placeholder="昵称" required>  <!-- 新增昵称 -->
+            <input type="text" name="nickname" placeholder="昵称" required>
             <input type="password" name="password" placeholder="密码" required>
-            <input type="password" name="confirm_password" placeholder="确认密码" required>  <!-- 新增密码确认 -->
+            <input type="password" name="confirm_password" placeholder="确认密码" required>
             <button type="submit" class="auth-btn">注册</button>
         </form>
         <div class="auth-link">

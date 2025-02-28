@@ -1,0 +1,99 @@
+/* navbar.css */
+
+/* 导航栏主体样式 */
+.navbar-sidebar {
+    width: 200px;
+    background: #2f353a;
+    color: #b7c0cd;
+    padding: 20px 0;
+    height: 100vh;
+    box-sizing: border-box;
+    overflow-y: auto;
+    text-align: center;
+}
+
+/* 导航栏品牌（标题）样式 */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 20px;
+    margin-bottom: 20px;
+}
+
+.navbar-brand i {
+    font-size: 24px;
+    margin-right: 10px;
+}
+
+.navbar-brand h2 {
+    font-size: 20px;
+    color: #fff;
+    margin: 0;
+}
+
+/* 导航栏按钮样式 */
+.navbar-sidebar a {
+    display: block;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #a0aec0;
+    transition: background-color 0.3s;
+    text-align: center;
+}
+
+.navbar-sidebar a:hover {
+    background-color: #2d3748;
+}
+
+/* 下拉菜单样式 */
+.navbar-dropdown {
+    position: relative;
+    margin: 5px 0; /* 一级菜单之间的距离 */
+}
+
+.navbar-dropdown-toggle {
+    cursor: pointer;
+    display: block;
+    padding: 10px 15px;
+    text-align: center;
+    position: relative;
+}
+
+.navbar-dropdown-toggle::after {
+    content: '\25BC'; /* 下拉三角号 */
+    position: absolute;
+    top: 50%; /* 垂直居中 */
+    transform: translateY(-50%);
+    right: 10px; /* 距离右侧10px */
+    font-size: 10px; /* 缩小三角号大小 */
+}
+
+.navbar-dropdown-menu {
+    display: none;
+    background-color: #2d3748;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative;
+    padding: 0; /* 移除内边距 */
+    text-align: center;
+    margin-top: -1px; /* 与一级菜单的距离一致 */
+}
+
+.navbar-dropdown-menu a {
+    display: block;
+    padding: 10px 15px; /* 与一级菜单的内边距一致 */
+    color: #a0aec0;
+    text-align: center;
+    border-top: 1px solid #2f353a; /* 添加分隔线，与一级菜单的间距一致 */
+    background-color: transparent !important; /* 确保默认状态透明 */
+    transition: background-color 0.3s; /* 添加过渡效果 */
+}
+
+.navbar-dropdown-menu a:hover {
+    background-color: #2d3748; /* 只在鼠标悬停时高亮 */
+}
+
+/* 显示下拉菜单 */
+.navbar-dropdown.active .navbar-dropdown-menu {
+    display: block;
+}

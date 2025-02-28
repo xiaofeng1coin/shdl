@@ -3,96 +3,38 @@
 <head>
     <title>Shortener</title>
     <link rel="stylesheet" href="/static/style.css">
-    <style>
-        /* 左侧导航栏样式 */
-        .sidebar {
-            width: 200px;
-            background-color: #1a202c; /* 深灰色背景，更具科技感 */
-            padding: 20px;
-            height: 100vh;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* 右侧阴影 */
-        }
-
-        .sidebar h2 {
-            color: #4299e1; /* 蓝色标题，更现代 */
-            margin-bottom: 20px;
-        }
-
-        .sidebar a {
-            display: block;
-            padding: 10px 15px;
-            text-decoration: none;
-            color: #a0aec0; /* 导航文字颜色，浅灰色 */
-            transition: background-color 0.3s; /* 过渡效果 */
-        }
-
-        .sidebar a:hover {
-            background-color: #2d3748; /* 鼠标悬停背景色，深一点的灰色 */
-        }
-
-        /* 下拉菜单样式 */
-        .dropdown {
-            position: relative;
-        }
-
-        .dropdown-toggle {
-            cursor: pointer;
-            position: relative;
-        }
-
-        .dropdown-toggle::after {
-            content: '\25BC'; /* 下拉标志 */
-            position: absolute;
-            right: 10px;
-            font-size: 12px; /* 调整三角号大小 */
-        }
-
-        .dropdown-menu {
-            display: none;
-            background-color: #2d3748; /* 下拉菜单背景色 */
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            position: relative;
-            padding-left: 20px;
-        }
-
-        .dropdown-menu a {
-            color: #a0aec0; /* 下拉菜单文字颜色 */
-        }
-
-        /* 显示下拉菜单 */
-        .dropdown.active .dropdown-menu {
-            display: block;
-        }
-
-        /* 内容区域的样式 */
-        .content {
-            flex: 1;
-            padding: 20px;
-            position: relative; /* 用于绝对定位按钮 */
-        }
-    </style>
+    <link rel="stylesheet" href="/static/links.css"> <!-- 新增对 links.css 的引用 -->
+    <link rel="stylesheet" href="/static/profile.css"> <!-- 引入个人信息页面的独立样式 -->
+    <link rel="stylesheet" href="/static/account_security.css"> <!-- 引入账户安全页面的独立样式 -->
+    <link rel="stylesheet" href="/static/dashboard.css"> <!-- 引入首页仪表盘页面的独立样式 -->
+    <link rel="stylesheet" href="/static/auth.css"> <!-- 引入登录和注册的认证样式 -->
+    <link rel="stylesheet" href="/static/stats.css"> <!-- 新增引入 stats.css -->
+    <link rel="stylesheet" href="/static/navbar.css"> <!-- 引入新的 navbar.css -->
 </head>
 <body>
     <div class="container">
-        <div class="sidebar">
-            <h2>短链管理系统</h2>
-            <a href="{{ url_for('index') }}">首页（仪表盘）</a>
-            <div class="dropdown">
-                <a href="#" class="dropdown-toggle" onclick="toggleDropdown(this)">我的账户</a>
-                <div class="dropdown-menu">
+        <div class="navbar-sidebar">
+            <div class="navbar-brand">
+                <i class="fa fa-link"></i>
+                <h2>短链管理系统</h2>
+            </div>
+            <a href="{{ url_for('index') }}">系统首页</a>
+            <div class="navbar-dropdown">
+                <a href="#" class="navbar-dropdown-toggle" onclick="toggleDropdown(this)">我的账户</a>
+                <div class="navbar-dropdown-menu">
                     <a href="{{ url_for('profile') }}">个人信息</a>
-                    <a href="{{ url_for('account_security') }}">账户安全</a> <!-- 修改这里 -->
+                    <a href="{{ url_for('account_security') }}">账户安全</a>
                 </div>
             </div>
-            <div class="dropdown">
-                <a href="#" class="dropdown-toggle" onclick="toggleDropdown(this)">短链管理</a>
-                <div class="dropdown-menu">
+            <div class="navbar-dropdown">
+                <a href="#" class="navbar-dropdown-toggle" onclick="toggleDropdown(this)">短链管理</a>
+                <div class="navbar-dropdown-menu">
                     <a href="{{ url_for('links') }}">我的短链</a>
                 </div>
             </div>
-            <div class="dropdown">
-                <a href="#" class="dropdown-toggle" onclick="toggleDropdown(this)">数据统计</a>
-                <div class="dropdown-menu">
+            <div class="navbar-dropdown">
+                <a href="#" class="navbar-dropdown-toggle" onclick="toggleDropdown(this)">数据统计</a>
+                <div class="navbar-dropdown-menu">
                     <a href="#">数据分析</a>
                 </div>
             </div>
