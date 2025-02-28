@@ -16,16 +16,17 @@
             <th>操作</th>
         </tr>
         {% for link in links %}
-        <tr>
-            <td><a href="{{ base_url }}{{ link.short_code }}" class="links-short-url">{{ base_url }}{{ link.short_code }}</a></td>
-            <td>{{ link.original_url }}</td>
-            <td>{{ link.clicks }}</td>
-            <td>{{ link.created_at.strftime('%Y-%m-%d') }}</td>
-            <td>
-                <button onclick="copyToClipboard('{{ base_url }}{{ link.short_code }}')" class="links-copy-btn">复制</button>
-                <a href="{{ url_for('link_stats', short_code=link.short_code) }}" class="links-stats-btn">统计</a>
-            </td>
-        </tr>
+        <tr data-short-code="{{ link.short_code }}">
+    <td><a href="{{ base_url }}{{ link.short_code }}" class="links-short-url">{{ base_url }}{{ link.short_code }}</a></td>
+    <td>{{ link.original_url }}</td>
+    <td>{{ link.clicks }}</td>
+    <td>{{ link.created_at.strftime('%Y-%m-%d') }}</td>
+    <td>
+        <button onclick="copyToClipboard('{{ base_url }}{{ link.short_code }}')" class="links-copy-btn">复制</button>
+        <a href="{{ url_for('link_stats', short_code=link.short_code) }}" class="links-stats-btn">统计</a>
+        <button onclick="deleteLink('{{ link.short_code }}')" class="links-delete-btn">删除</button>
+    </td>
+</tr>
         {% endfor %}
     </table>
     <script>
@@ -33,5 +34,34 @@
         navigator.clipboard.writeText(text);
         alert('已复制: ' + text);
     }
+
+    function deleteLink(shortCode) {
+    if (confirm("确定要删除这个短链接吗？")) {
+        fetch("{{ url_for('delete_link') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ short_code: shortCode })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('短链接已删除');
+                // 动态移除对应的行
+                const row = document.querySelector(`tr[data-short-code="${shortCode}"]`);
+                if (row) {
+                    row.remove();
+                }
+            } else {
+                alert('删除失败: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('删除失败');
+        });
+    }
+}
     </script>
 {% endblock %}

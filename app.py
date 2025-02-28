@@ -202,8 +202,6 @@ def upload_avatar():
 def account_security():
     return render_template('account_security.html', user=current_user)
 
-
-
 @app.route('/update_nickname', methods=['POST'])
 @login_required
 def update_nickname():
@@ -246,6 +244,22 @@ def delete_account():
         return jsonify({"success": True, "message": "账户已注销，您将被重定向到登录页面"})
     except Exception as e:
         return jsonify({"success": False, "message": "注销失败，请稍后再试"})
+
+@app.route('/delete_link', methods=['POST'])
+@login_required
+def delete_link():
+    data = request.json
+    short_code = data.get('short_code')
+    if not short_code:
+        return jsonify({"success": False, "message": "无效的短链接代码"})
+
+    link = Link.query.filter_by(short_code=short_code, user_id=current_user.id).first()
+    if link:
+        db.session.delete(link)
+        db.session.commit()  # 确保提交事务
+        return jsonify({"success": True, "message": "短链接已删除"})
+    else:
+        return jsonify({"success": False, "message": "短链接不存在或您无权删除"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8462)
