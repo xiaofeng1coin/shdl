@@ -3,14 +3,14 @@
 <head>
     <title>Shortener</title>
     <link rel="stylesheet" href="/static/css/style.css">
-    <link rel="stylesheet" href="/static/css/links.css"> <!-- 新增对 links.css 的引用 -->
-    <link rel="stylesheet" href="/static/css/profile.css"> <!-- 引入个人信息页面的独立样式 -->
-    <link rel="stylesheet" href="/static/css/account_security.css"> <!-- 引入账户安全页面的独立样式 -->
-    <link rel="stylesheet" href="/static/css/dashboard.css"> <!-- 引入首页仪表盘页面的独立样式 -->
-    <link rel="stylesheet" href="/static/css/auth.css"> <!-- 引入登录和注册的认证样式 -->
-    <link rel="stylesheet" href="/static/css/stats.css"> <!-- 新增引入 stats.css -->
-    <link rel="stylesheet" href="/static/css/navbar.css"> <!-- 引入新的 navbar.css -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.4/dist/sweetalert2.min.css"><!-- 引入 SweetAlert2弹窗 的 CSS -->
+    <link rel="stylesheet" href="/static/css/links.css">
+    <link rel="stylesheet" href="/static/css/profile.css">
+    <link rel="stylesheet" href="/static/css/account_security.css">
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <link rel="stylesheet" href="/static/css/auth.css">
+    <link rel="stylesheet" href="/static/css/stats.css">
+    <link rel="stylesheet" href="/static/css/navbar.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.4/dist/sweetalert2.min.css">
 </head>
 <body>
     <div class="navbar-container">
@@ -19,21 +19,29 @@
                 <i class="fa fa-link"></i>
                 <h2>短链管理系统</h2>
             </div>
-            <a href="{{ url_for('index') }}">系统首页</a>
-            <div class="navbar-dropdown">
-                <a href="#" class="navbar-dropdown-toggle" onclick="toggleDropdown(this)">我的账户</a>
-                <div class="navbar-dropdown-menu">
-                    <a href="{{ url_for('profile') }}">个人信息</a>
-                    <a href="{{ url_for('account_security') }}">账户安全</a>
+            {% if current_user.is_superuser %}
+                <!-- 超级用户导航栏 -->
+                <a href="{{ url_for('user_management') }}">用户管理</a>
+                <a href="{{ url_for('account_security') }}">账户安全</a>
+                <a href="{{ url_for('logout') }}">退出账户</a>
+            {% else %}
+                <!-- 普通用户导航栏 -->
+                <a href="{{ url_for('index') }}">系统首页</a>
+                <div class="navbar-dropdown">
+                    <a href="#" class="navbar-dropdown-toggle" onclick="toggleDropdown(this)">我的账户</a>
+                    <div class="navbar-dropdown-menu">
+                        <a href="{{ url_for('profile') }}">个人信息</a>
+                        <a href="{{ url_for('account_security') }}">账户安全</a>
+                    </div>
                 </div>
-            </div>
-            <div class="navbar-dropdown">
-                <a href="#" class="navbar-dropdown-toggle" onclick="toggleDropdown(this)">短链管理</a>
-                <div class="navbar-dropdown-menu">
-                    <a href="{{ url_for('links') }}">我的短链</a>
+                <div class="navbar-dropdown">
+                    <a href="#" class="navbar-dropdown-toggle" onclick="toggleDropdown(this)">短链管理</a>
+                    <div class="navbar-dropdown-menu">
+                        <a href="{{ url_for('links') }}">我的短链</a>
+                    </div>
                 </div>
-            </div>
-            <a href="{{ url_for('logout') }}">退出账户</a>
+                <a href="{{ url_for('logout') }}">退出账户</a>
+            {% endif %}
         </div>
         <div class="navbar-content">
             {% block content %}{% endblock %}

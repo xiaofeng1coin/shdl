@@ -35,15 +35,28 @@ def home():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        account_name = request.form['account_name']  # 修改为 account_name
+        account_name = request.form['account_name']
         password = request.form['password']
-        user = User.query.filter_by(account_name=account_name).first()  # 修改为 account_name
-        if user and user.password == password:
-            login_user(user, remember=True)  # 使用 remember=True 保持登录状态
-            session.permanent = True  # 设置 session 为持久化
-            app.permanent_session_lifetime = timedelta(hours=24)  # 设置 session 有效期为 24 小时
+
+        # 查询用户是否存在
+        user = User.query.filter_by(account_name=account_name).first()
+        if not user:
+            # 如果用户不存在，返回账户不存在的错误
+            return jsonify({"error": "账户不存在"})
+
+        # 如果用户存在但密码不匹配，返回密码错误的错误
+        if user.password != password:
+            return jsonify({"error": "密码错误"})
+
+        # 登录成功
+        login_user(user, remember=True)
+        session.permanent = True
+        app.permanent_session_lifetime = timedelta(hours=24)
+        # 如果是超级用户，重定向到用户管理页面
+        if user.is_superuser:
+            return jsonify({"redirect": url_for('user_management')})
+        else:
             return jsonify({"redirect": url_for('index')})
-        return jsonify({"error": "账户名或密码错误"})
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -359,6 +372,69 @@ def create_link():
             "created_at": new_link.created_at.strftime('%Y-%m-%d')
         }
     })
+
+@app.route('/user_management')
+@login_required
+def user_management():
+    if not current_user.is_superuser:
+        return "您没有权限访问此页面", 403
+
+    # 查询所有普通用户及其短链数量，排除超级用户
+    users = User.query.outerjoin(Link).group_by(User.id).with_entities(
+        User.id,
+        User.account_name,
+        User.nickname,
+        User.register_time,
+        func.count(Link.id).label('link_count')
+    ).filter(User.is_superuser == False).all()
+
+    # 重新编号用户 ID（从 1 开始）
+    user_list = []
+    for index, user in enumerate(users, start=1):
+        user_list.append({
+            "display_id": index,  # 重新编号的用户 ID
+            "id": user.id,  # 数据库中的用户 ID
+            "account_name": user.account_name,
+            "nickname": user.nickname,
+            "register_time": user.register_time,
+            "link_count": user.link_count
+        })
+
+    return render_template('user_management.html', users=user_list)
+
+@app.route('/update_user_password', methods=['POST'])
+@login_required
+def update_user_password():
+    if not current_user.is_superuser:
+        return jsonify({"success": False, "message": "您没有权限执行此操作"}), 403
+    data = request.json
+    user_id = data.get('user_id')
+    new_password = data.get('new_password')
+    if not user_id or not new_password:
+        return jsonify({"success": False, "message": "参数错误"})
+    user = User.query.get(user_id)
+    if user and not user.is_superuser:  # 确保不会修改超级用户的密码
+        user.password = new_password
+        db.session.commit()
+        return jsonify({"success": True, "message": "密码修改成功"})
+    return jsonify({"success": False, "message": "用户不存在或无法修改"})
+
+@app.route('/delete_user/<int:user_id>', methods=['POST'])
+@login_required
+def delete_user(user_id):
+    if not current_user.is_superuser:
+        return jsonify({"success": False, "message": "您没有权限执行此操作"}), 403
+
+    user = User.query.get(user_id)
+    if user:
+        try:
+            db.session.delete(user)
+            db.session.commit()
+            return jsonify({"success": True, "message": "用户删除成功"})
+        except Exception as e:
+            return jsonify({"success": False, "message": "删除失败，请稍后再试"})
+    else:
+        return jsonify({"success": False, "message": "用户不存在"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8462)

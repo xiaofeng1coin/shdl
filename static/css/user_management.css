@@ -1,0 +1,130 @@
+/* user_management.css */
+
+/* 表单样式 */
+.user-management-form {
+    margin-bottom: 20px;
+}
+
+.user-management-create-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: 1px solid #333;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    margin: 0 5px;
+    vertical-align: middle;
+}
+
+/* 表格样式 */
+.user-management-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.user-management-table th,
+.user-management-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 40px;
+    vertical-align: middle;
+}
+
+/* 列样式 */
+.col-user-id {
+    width: 50px;
+}
+
+.col-account-name {
+    width: 150px;
+}
+
+.col-nickname {
+    width: 150px;
+}
+
+.col-register-time {
+    width: 150px;
+}
+
+.col-actions {
+    width: 180px;
+}
+
+/* 表头样式 */
+.user-management-table th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+}
+
+/* 按钮样式 */
+.user-management-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    background: #4CAF50;
+    color: white;
+    text-decoration: none;
+    border: 1px solid #333;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 0 5px;
+    vertical-align: middle;
+}
+
+.user-management-delete-btn {
+    background-color: #d9534f;
+}
+
+/* user_management.css */
+
+/* 输入框样式 */
+.user-management-input {
+    padding: 10px 15px;
+    border: 1px solid #ccc; /* 上下边框颜色和粗细 */
+    border-left: 1px solid #ccc; /* 左边框颜色和粗细 */
+    border-right: 1px solid #ccc; /* 右边框颜色和粗细 */
+    border-radius: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+}
+
+.user-management-input:focus {
+    border-color: #4C56AFFF; /* 聚焦时的边框颜色 */
+    box-shadow: 0 0 8px rgb(76, 86, 175);
+    outline: none;
+}
+
+/* 页面标题 */
+.user-management-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* 新增短链数量列的样式 */
+.col-link-count {
+    width: 80px;
+}
+
+.user-management-password-btn {
+    background-color: #2196F3; /* 修改密码按钮使用蓝色 */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 0 5px;
+    vertical-align: middle;
+}
+

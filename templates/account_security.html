@@ -2,11 +2,21 @@
 {% block content %}
     <h2 class="security-title">账户安全</h2>
     <div class="security-container">
-        <div class="security-item">
-            <label for="nickname">账户昵称</label>
-            <div class="security-value">{{ user.nickname }}</div>
-            <button id="edit-nickname-btn" class="security-btn">修改</button>
-        </div>
+        {% if not current_user.is_superuser %}
+            <!-- 普通用户可以修改昵称 -->
+            <div class="security-item">
+                <label for="nickname">账户昵称</label>
+                <div class="security-value">{{ user.nickname }}</div>
+                <button id="edit-nickname-btn" class="security-btn">修改</button>
+            </div>
+        {% else %}
+            <!-- 超级用户不显示昵称修改功能 -->
+            <div class="security-item">
+                <label for="nickname">账户昵称</label>
+                <div class="security-value">{{ user.nickname }}</div>
+            </div>
+        {% endif %}
+
         <div class="security-item">
             <label for="password">账户密码</label>
             <div class="security-value">********</div>
@@ -16,122 +26,96 @@
             <label for="register-time">注册时间</label>
             <div class="security-value">{{ user.register_time.strftime('%Y-%m-%d %H:%M:%S') }}</div>
         </div>
-        <div class="security-item">
-            <button id="delete-account-btn" class="security-btn delete-btn">注销账户</button>
-        </div>
+        {% if not current_user.is_superuser %}
+            <!-- 普通用户可以注销账户 -->
+            <div class="security-item">
+                <button id="delete-account-btn" class="security-btn delete-btn">注销账户</button>
+            </div>
+        {% endif %}
     </div>
 
     <!-- 提示信息 -->
     <div id="notification" class="security-notification"></div>
 
     <script>
-        // 引入 SweetAlert2 的 JavaScript 文件
         document.addEventListener('DOMContentLoaded', function() {
             const script = document.createElement('script');
             script.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11.1.4/dist/sweetalert2.all.min.js';
             document.body.appendChild(script);
         });
 
-        // 修改昵称逻辑
-        document.getElementById('edit-nickname-btn').addEventListener('click', function() {
+        {% if not current_user.is_superuser %}
+            // 普通用户可以修改昵称
+            document.getElementById('edit-nickname-btn').addEventListener('click', function() {
+                Swal.fire({
+                    title: '<span style="font-size: 16px;">修改昵称</span>',
+                    html: `
+                        <div style="text-align: center;">
+                            <input type="text" id="new-nickname" placeholder="请输入新的昵称" class="swal2-input" style="display: inline-block; text-align: center; font-size: 14px;">
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    focusConfirm: false,
+                    preConfirm: () => {
+                        const newNickname = document.getElementById('new-nickname').value;
+                        if (!newNickname) {
+                            Swal.showValidationMessage('<span style="font-size: 14px;">新昵称不能为空</span>');
+                        }
+                        return newNickname;
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch('/update_nickname', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: `new_nickname=${result.value}`
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                document.querySelector('.security-value').innerText = result.value;
+                                showNotification(data.message, 'success');
+                            } else {
+                                showNotification(data.message, 'error');
+                            }
+                        });
+                    }
+                });
+            });
+        {% endif %}
+
+        // 修改密码逻辑
+        document.getElementById('edit-password-btn').addEventListener('click', function() {
             Swal.fire({
-                title: '<span style="font-size: 16px;">修改昵称</span>',
+                title: '<span style="font-size: 16px;">修改密码</span>',
                 html: `
                     <div style="text-align: center;">
-                        <input type="text" id="new-nickname" placeholder="请输入新的昵称" class="swal2-input" style="display: inline-block; text-align: center; font-size: 14px;">
+                        <input type="password" id="new-password" placeholder="请输入新密码" class="swal2-input" style="display: block; margin: 10px 0; font-size: 14px;">
+                        <input type="password" id="confirm-password" placeholder="再次输入新密码" class="swal2-input" style="display: block; margin: 10px 0; font-size: 14px;">
                     </div>
                 `,
                 showCancelButton: true,
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
-                focusConfirm: false, // 取消确认按钮的默认高亮
+                focusConfirm: false,
                 preConfirm: () => {
-                    const newNickname = document.getElementById('new-nickname').value;
-                    if (!newNickname) {
-                        Swal.showValidationMessage('<span style="font-size: 14px;">新昵称不能为空</span>');
+                    const newPassword = document.getElementById('new-password').value;
+                    const confirmPassword = document.getElementById('confirm-password').value;
+                    if (!newPassword || !confirmPassword) {
+                        Swal.showValidationMessage('<span style="font-size: 14px;">密码不能为空</span>');
+                    } else if (newPassword !== confirmPassword) {
+                        Swal.showValidationMessage('<span style="font-size: 14px;">两次输入的密码不一致</span>');
                     }
-                    return newNickname;
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch('/update_nickname', {
+                    const newPassword = document.getElementById('new-password').value;
+                    fetch('/update_password', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: `new_nickname=${result.value}`
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            document.querySelector('.security-value').innerText = result.value;
-                            showNotification(data.message, 'success');
-                        } else {
-                            showNotification(data.message, 'error');
-                        }
-                    });
-                }
-            });
-        });
-
-        // 修改密码逻辑
-        document.getElementById('edit-password-btn').addEventListener('click', function() {
-    Swal.fire({
-        title: '<span style="font-size: 16px;">修改密码</span>',
-        html: `
-            <div style="text-align: center;">
-                <input type="password" id="new-password" placeholder="请输入新密码" class="swal2-input" style="display: block; margin: 10px 0; font-size: 14px;">
-                <input type="password" id="confirm-password" placeholder="再次输入新密码" class="swal2-input" style="display: block; margin: 10px 0; font-size: 14px;">
-            </div>
-        `,
-        showCancelButton: true,
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        focusConfirm: false, // 取消确认按钮的默认高亮
-        preConfirm: () => {
-            const newPassword = document.getElementById('new-password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-            if (!newPassword || !confirmPassword) {
-                Swal.showValidationMessage('<span style="font-size: 14px;">密码不能为空</span>');
-            } else if (newPassword !== confirmPassword) {
-                Swal.showValidationMessage('<span style="font-size: 14px;">两次输入的密码不一致</span>');
-            }
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const newPassword = document.getElementById('new-password').value;
-            fetch('/update_password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `new_password=${newPassword}&confirm_password=${newPassword}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification(data.message, 'success');
-                    setTimeout(() => {
-                        window.location.href = "{{ url_for('login') }}";
-                    }, 2000);
-                } else {
-                    showNotification(data.message, 'error');
-                }
-            });
-        }
-    });
-});
-
-        // 注销账户逻辑
-        document.getElementById('delete-account-btn').addEventListener('click', function() {
-            Swal.fire({
-                title: '确认注销',
-                text: '确定要注销账户吗？注销后将无法使用该账户登录。',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: '确认注销',
-                cancelButtonText: '取消',
-                focusConfirm: false // 取消确认按钮的默认高亮
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch('/delete_account', {
-                        method: 'POST'
+                        body: `new_password=${newPassword}&confirm_password=${newPassword}`
                     })
                     .then(response => response.json())
                     .then(data => {

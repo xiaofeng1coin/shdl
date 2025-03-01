@@ -12,6 +12,7 @@ class User(UserMixin, db.Model):
     timezone = db.Column(db.String(50), default="UTC")
     avatar = db.Column(db.String(200), default="avatar.jpg")
     links = db.relationship('Link', backref='user', lazy=True)
+    is_superuser = db.Column(db.Boolean, default=False)  # 新增超级用户标识
 
 class Link(db.Model):
     id = db.Column(db.Integer, primary_key=True)
