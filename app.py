@@ -4,7 +4,7 @@ from flask_login import login_user, logout_user, login_required, current_user, L
 from models import db, User, Link
 from auth import login_manager
 from datetime import datetime, timedelta
-from sqlalchemy import func
+from sqlalchemy import func, desc  # 添加 desc 的导入
 import secrets
 import pytz  # 引入 pytz 库以支持完整的时区名称
 
@@ -140,21 +140,59 @@ def links():
     base_url = request.host_url
     return render_template('links.html', links=links, base_url=base_url)
 
+
 @app.route('/<short_code>')
-def redirect_short_url(short_code):
+def redirect_to_original(short_code):
     link = Link.query.filter_by(short_code=short_code).first()
     if link:
+        # 更新点击量
         link.clicks += 1
+        link.clicks_at = datetime.now()
         db.session.commit()
         return redirect(link.original_url)
-    return 'Link not found', 404
+    else:
+        return "Short link not found", 404
 
 @app.route('/stats/<short_code>')
 @login_required
 def link_stats(short_code):
     link = Link.query.filter_by(short_code=short_code).first()
-    return render_template('stats.html', link=link)
+    if not link:
+        return "Link not found", 404
 
+    # 获取当前日期
+    today = datetime.now().date()
+    # 生成日期范围（从今日开始，往前推8天）
+    date_range = [(today - timedelta(days=i)) for i in range(8, -1, -1)]
+    date_range_str = [date.strftime('%Y-%m-%d') for date in date_range]
+
+    # 查询每个日期的点击量
+    clicks_by_day = db.session.query(
+        func.date(Link.clicks_at).label('day'),
+        func.sum(Link.clicks).label('click_count')  # 统计每天的点击量
+    ).filter(
+        Link.short_code == short_code,
+        Link.clicks_at >= date_range[-1]  # 只查询最近9天的数据
+    ).group_by('day').order_by('day').all()
+
+    # 将查询结果转换为字典
+    clicks_dict = {day: count for day, count in clicks_by_day}
+
+    # 生成完整的日期和点击量数据
+    days = []
+    clicks = []
+    for date in date_range_str:
+        days.append(date)
+        clicks.append(clicks_dict.get(date, 0))  # 如果某天没有数据，则点击量为0
+
+    # 获取总点击量
+    total_clicks = link.clicks  # 使用Link模型中的clicks字段
+
+    return render_template('stats.html',
+                           link=link,
+                           days=days,
+                           clicks=clicks,
+                           total_clicks=total_clicks)  # 将总点击量传递到前端
 @app.route('/profile')
 @login_required
 def profile():
@@ -283,6 +321,44 @@ def update_link():
     db.session.commit()
 
     return jsonify({"success": True, "message": "链接已更新"})
+
+@app.route('/create_link', methods=['POST'])
+@login_required
+def create_link():
+    data = request.json
+    original_url = data.get('original_url')
+    custom_suffix = data.get('custom_suffix')
+
+    if not original_url:
+        return jsonify({"success": False, "message": "长链接不能为空"})
+
+    # 检查自定义后缀是否冲突
+    if custom_suffix and Link.query.filter_by(short_code=custom_suffix).first():
+        return jsonify({"success": False, "message": "自定义后缀已存在"})
+
+    # 生成短链接
+    short_code = custom_suffix or secrets.token_urlsafe(4)
+
+    # 创建新的短链接
+    new_link = Link(
+        original_url=original_url,
+        short_code=short_code,
+        user_id=current_user.id
+    )
+    db.session.add(new_link)
+    db.session.commit()
+
+    # 返回新创建的短链数据
+    return jsonify({
+        "success": True,
+        "message": "短链接已创建",
+        "link": {
+            "short_code": new_link.short_code,
+            "original_url": new_link.original_url,
+            "clicks": new_link.clicks,
+            "created_at": new_link.created_at.strftime('%Y-%m-%d')
+        }
+    })
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8462)

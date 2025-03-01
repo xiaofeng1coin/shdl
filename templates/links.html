@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
     <h1 class="security-title">管理短链</h1>
-    <form method="POST" class="links-form">
+    <form method="POST" class="links-form" id="create-link-form">
         <input type="url" name="original_url" placeholder="长链接" required>
         <input type="text" name="custom_suffix" placeholder="自定义后缀（可选）">
-        <button type="submit" class="links-create-btn">创建</button>
+        <button type="button" class="links-create-btn" onclick="createLink()">创建</button>
     </form>
 
     <table class="links-table">
@@ -192,5 +192,91 @@
                 });
             });
         }
+
+        function createLink() {
+    const form = document.getElementById('create-link-form');
+    const formData = new FormData(form);
+    const originalUrl = formData.get('original_url');
+    const customSuffix = formData.get('custom_suffix');
+
+    if (!originalUrl) {
+        Swal.fire({
+            icon: 'error',
+            title: '输入错误',
+            text: '长链接不能为空'
+        });
+        return;
+    }
+
+    fetch("{{ url_for('create_link') }}", {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        original_url: originalUrl,
+        custom_suffix: customSuffix
+    })
+})
+.then(response => response.json())
+.then(data => {
+    console.log("Response from backend:", data);  // 打印后端返回的数据
+
+    if (data.success) {
+        Swal.fire({
+            icon: 'success',
+            title: '创建成功',
+            text: '短链接已创建',
+            showConfirmButton: false,
+            timer: 1500
+        });
+
+        // 清空表单
+        form.reset();
+const base_url = "{{ request.host_url }}";
+        // 动态添加新短链到表格
+        const linksTable = document.querySelector('.links-table tbody');
+        const newRow = document.createElement('tr');
+        newRow.setAttribute('data-short-code', data.link.short_code);
+        newRow.innerHTML = `
+            <td class="col-short-link"><a href="${base_url}${data.link.short_code}" class="links-short-url">${base_url}${data.link.short_code}</a></td>
+            <td class="col-original-url" data-url="${data.link.original_url}">${data.link.original_url}</td>
+            <td class="col-custom-suffix" data-suffix="${data.link.short_code}">${data.link.short_code}</td>
+            <td class="col-clicks">${data.link.clicks}</td>
+            <td class="col-created-at">${data.link.created_at}</td>
+            <td class="col-actions">
+                <button class="links-edit-btn" onclick="editLink('${data.link.short_code}')">编辑</button>
+                <button class="links-save-btn" onclick="saveLink('${data.link.short_code}')" style="display: none;">保存</button>
+                <button class="links-copy-btn" onclick="copyToClipboard('${base_url}${data.link.short_code}')">复制</button>
+                <button class="links-stats-btn" onclick="location.href='{{ url_for('link_stats', short_code='') }}'.replace('', '${data.link.short_code}')">统计</button>
+                <button class="links-delete-btn" onclick="deleteLink('${data.link.short_code}')">删除</button>
+            </td>
+        `;
+        linksTable.appendChild(newRow);
+    } else {
+        Swal.fire({
+            icon: 'error',
+            title: '创建失败',
+            text: data.message || '未知错误'
+        });
+    }
+})
+.catch(error => {
+    console.error('Error:', error);
+    Swal.fire({
+        icon: 'error',
+        title: '创建失败',
+        text: '发生错误，请稍后再试'
+    });
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: '创建失败',
+            text: '发生错误，请稍后再试'
+        });
+    });
+}
     </script>
 {% endblock %}

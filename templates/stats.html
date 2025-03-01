@@ -1,10 +1,70 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1 class="stats-title">Stats for {{ link.short_code }}</h1>
+    <link rel="stylesheet" href="/static/css/stats.css">
     <div class="stats-container">
-        <div class="stats-clicks">
-            <h3>Total Clicks: {{ link.clicks }}</h3>
+        <div class="stats-short-link">
+            <h3>短链地址</h3>
+            <p>{{ request.host_url }}{{ link.short_code }}</p>
         </div>
-        <canvas id="stats-chart"></canvas>
+
+        <div class="stats-summary">
+            <div class="stats-clicks">
+                <h3>总点击量</h3>
+                <p>{{ total_clicks }}</p> <!-- 使用后端传递的总点击量 -->
+            </div>
+        </div>
+
+        <div class="stats-chart">
+            <canvas id="stats-chart"></canvas>
+        </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const days = JSON.parse('{{ days|tojson|safe }}');
+const clicks = JSON.parse('{{ clicks|tojson|safe }}');
+const totalClicks = parseInt("{{ total_clicks }}", 10);  // 确保转换为整数
+
+const ctx = document.getElementById('stats-chart').getContext('2d');
+const chartData = {
+    labels: days,
+    datasets: [{
+        label: '点击量',
+        data: clicks,
+        borderColor: 'rgba(75, 192, 192, 1)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        fill: true,
+    }]
+};
+
+const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+        x: {
+            title: {
+                display: true,
+                text: '日期'
+            }
+        },
+        y: {
+            title: {
+                display: true,
+                text: '点击量'
+            },
+            beginAtZero: true,
+            ticks: {
+                stepSize: 1,
+                max: totalClicks
+            }
+        }
+    }
+};
+
+new Chart(ctx, {
+    type: 'line',
+    data: chartData,
+    options: chartOptions
+});
+    </script>
 {% endblock %}

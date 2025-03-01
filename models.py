@@ -20,4 +20,4 @@ class Link(db.Model):
     clicks = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=db.func.now())
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    timezone = db.Column(db.String(50), nullable=True)
+    clicks_at = db.Column(db.DateTime, nullable=True)
