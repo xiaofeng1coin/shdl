@@ -23,6 +23,7 @@
                 <!-- 超级用户导航栏 -->
                 <a href="{{ url_for('user_management') }}">用户管理</a>
                 <a href="{{ url_for('account_security') }}">账户安全</a>
+            <a href="{{ url_for('superuser_login_log') }}">登录日志</a> <!-- 添加超级用户登录日志链接 -->
                 <a href="{{ url_for('logout') }}">退出账户</a>
             {% else %}
                 <!-- 普通用户导航栏 -->
@@ -40,6 +41,7 @@
                         <a href="{{ url_for('links') }}">我的短链</a>
                     </div>
                 </div>
+                <a href="{{ url_for('login_log') }}">登录日志</a> <!-- 添加登录日志按钮 -->
                 <a href="{{ url_for('logout') }}">退出账户</a>
             {% endif %}
         </div>

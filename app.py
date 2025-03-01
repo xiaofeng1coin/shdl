@@ -1,19 +1,24 @@
+# app.py
 import os
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from flask_login import login_user, logout_user, login_required, current_user, LoginManager
-from models import db, User, Link
+from models import db, User, Link, LoginLog  # 确保导入 LoginLog
 from auth import login_manager
 from datetime import datetime, timedelta
-from sqlalchemy import func, desc  # 添加 desc 的导入
+from sqlalchemy import func, desc
 import secrets
-import pytz  # 引入 pytz 库以支持完整的时区名称
+import pytz
+from user_agents import parse  # 导入 user_agents 库
+import requests  # 导入 requests 库
+from sqlalchemy.orm import joinedload
+import logging
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = 'static/uploads'  # 添加头像上传目录
-app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}  # 允许的文件扩展名
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 
 # 初始化组件
 db.init_app(app)
@@ -32,6 +37,35 @@ def home():
         return redirect(url_for('index'))
     return redirect(url_for('login'))
 
+
+# IPinfo API 配置
+IPINFO_API_KEY = "281293911c5b75"  # 替换为你的 IPinfo API 密钥
+IPINFO_URL = "https://ipinfo.io/{ip}/json?token={token}"
+
+
+def get_real_ip():
+    """获取真实的客户端 IP 地址"""
+    if request.headers.getlist("X-Forwarded-For"):
+        return request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        return request.remote_addr
+
+
+def get_login_location(ip):
+    """根据 IP 地址获取登录地址"""
+    if ip.startswith("127.0.0.1") or ip.startswith("192.168"):
+        return "本地"
+
+    try:
+        response = requests.get(IPINFO_URL.format(ip=ip, token=IPINFO_API_KEY))
+        response.raise_for_status()
+        location_data = response.json()
+        return f"{location_data.get('region', '未知')} {location_data.get('city', '未知')}"
+    except requests.RequestException as e:
+        print(f"Error fetching location data: {e}")
+        return "未知"
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -41,18 +75,54 @@ def login():
         # 查询用户是否存在
         user = User.query.filter_by(account_name=account_name).first()
         if not user:
-            # 如果用户不存在，返回账户不存在的错误
             return jsonify({"error": "账户不存在"})
 
-        # 如果用户存在但密码不匹配，返回密码错误的错误
+        # 检查密码是否正确
         if user.password != password:
+            # 记录登录失败的日志
+            user_ip = get_real_ip()
+            login_location = get_login_location(user_ip)
+            login_log = LoginLog(
+                user_id=user.id,
+                login_time=datetime.now(),
+                ip_address=user_ip,
+                device_info="未知",  # 可以选择不解析 User-Agent 或设置为默认值
+                login_status="失败",
+                login_location=login_location
+            )
+            db.session.add(login_log)
+            db.session.commit()
+            print(f"Login failed for user {user.account_name} from IP {user_ip}")  # 调试信息
             return jsonify({"error": "密码错误"})
 
         # 登录成功
         login_user(user, remember=True)
         session.permanent = True
         app.permanent_session_lifetime = timedelta(hours=24)
-        # 如果是超级用户，重定向到用户管理页面
+
+        # 获取用户的 IP 地址和登录地址
+        user_ip = get_real_ip()
+        login_location = get_login_location(user_ip)
+
+        # 获取 User-Agent 信息
+        user_agent = request.headers.get('User-Agent')
+        parsed_agent = parse(user_agent)
+        device_type = parsed_agent.os.family
+
+        # 记录登录成功的日志
+        login_log = LoginLog(
+            user_id=user.id,
+            login_time=datetime.now(),
+            ip_address=user_ip,
+            device_info=device_type,
+            login_status="成功",
+            login_location=login_location
+        )
+        db.session.add(login_log)
+        db.session.commit()
+        print(f"Login successful for user {user.account_name} from IP {user_ip}")  # 调试信息
+
+        # 重定向
         if user.is_superuser:
             return jsonify({"redirect": url_for('user_management')})
         else:
@@ -288,12 +358,21 @@ def update_password():
 @login_required
 def delete_account():
     try:
+        # 获取当前用户
+        user = current_user
+
+        # 删除与该用户关联的所有登录日志
+        LoginLog.query.filter_by(user_id=user.id).delete()
+
         # 删除当前用户
-        db.session.delete(current_user)
+        db.session.delete(user)
         db.session.commit()
-        logout_user()  # 注销登录
+
+        # 注销登录
+        logout_user()
         return jsonify({"success": True, "message": "账户已注销，您将被重定向到登录页面"})
     except Exception as e:
+        print(f"Error deleting account: {e}")  # 打印错误信息
         return jsonify({"success": False, "message": "注销失败，请稍后再试"})
 
 @app.route('/delete_link', methods=['POST'])
@@ -435,6 +514,24 @@ def delete_user(user_id):
             return jsonify({"success": False, "message": "删除失败，请稍后再试"})
     else:
         return jsonify({"success": False, "message": "用户不存在"})
+
+@app.route('/login_log')
+@login_required
+def login_log():
+    # 查询当前用户的登录日志
+    login_logs = LoginLog.query.filter_by(user_id=current_user.id).order_by(desc(LoginLog.login_time)).all()
+    return render_template('login_log.html', login_logs=login_logs)
+
+# app.py
+@app.route('/superuser_login_log')
+@login_required
+def superuser_login_log():
+    if not current_user.is_superuser:
+        return "您没有权限访问此页面", 403
+
+    # 查询所有用户的登录日志，并预加载关联的用户信息
+    login_logs = db.session.query(LoginLog).options(joinedload(LoginLog.user)).order_by(desc(LoginLog.login_time)).all()
+    return render_template('superuser_login_log.html', login_logs=login_logs)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8462)

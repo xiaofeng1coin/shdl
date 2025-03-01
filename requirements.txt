@@ -10,3 +10,4 @@ geoip2
 httpagentparser
 maxminddb-geolite2
 requests
+user_agents

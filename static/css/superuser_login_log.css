@@ -1,0 +1,43 @@
+/* superuser_login_log.css */
+.superuser-login-log-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.superuser-login-log-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.superuser-login-log-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.superuser-login-log-table th,
+.superuser-login-log-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 40px;
+    vertical-align: middle;
+}
+
+.superuser-login-log-table th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+}
+
+.superuser-login-log-table td {
+    font-size: 14px;
+    color: #333;
+}

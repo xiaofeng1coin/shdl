@@ -1,3 +1,4 @@
+<!-- account_security.html -->
 {% extends "base.html" %}
 {% block content %}
     <h2 class="security-title">账户安全</h2>
@@ -106,16 +107,24 @@
                     if (!newPassword || !confirmPassword) {
                         Swal.showValidationMessage('<span style="font-size: 14px;">密码不能为空</span>');
                     } else if (newPassword !== confirmPassword) {
-                        Swal.showValidationMessage('<span style="font-size: 14px;">两次输入的密码不一致</span>');
+                        Swal.fire({
+                            icon: 'error',
+                            title: '密码不一致',
+                            text: '两次输入的密码不一致，请重新输入',
+                            confirmButtonText: '确定'
+                        });
+                        return false;
                     }
+                    return { newPassword };
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    const newPassword = document.getElementById('new-password').value;
                     fetch('/update_password', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: `new_password=${newPassword}&confirm_password=${newPassword}`
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            new_password: result.value.newPassword
+                        })
                     })
                     .then(response => response.json())
                     .then(data => {
@@ -127,6 +136,51 @@
                         } else {
                             showNotification(data.message, 'error');
                         }
+                    });
+                }
+            });
+        });
+
+        // 注销账户逻辑
+        document.getElementById('delete-account-btn').addEventListener('click', function() {
+            Swal.fire({
+                title: '确定要注销账户吗？',
+                text: '此操作无法撤销！',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '确定',
+                cancelButtonText: '取消'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/delete_account', {
+                        method: 'POST'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: data.message,
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+                            setTimeout(() => {
+                                window.location.href = "{{ url_for('login') }}";
+                            }, 2000);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: data.message
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: '注销失败',
+                            text: '请稍后再试。'
+                        });
                     });
                 }
             });

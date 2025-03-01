@@ -1,0 +1,45 @@
+/* login_log.css */
+.login-log-container {
+    padding: 20px;
+    background-color: transparent; /* 去掉背景色 */
+    border: none; /* 去掉边框 */
+    box-shadow: none; /* 去掉阴影 */
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.login-log-title {
+    font-size: 1.25rem; /* 与账户安全页面的标题字号一致 */
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.login-log-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.login-log-table th,
+.login-log-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 40px;
+    vertical-align: middle;
+    font-size: 14px; /* 调整字号 */
+}
+
+.login-log-table th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+}
+
+/* 缩小序号列的宽度 */
+.login-log-table th:nth-child(1),
+.login-log-table td:nth-child(1) {
+    width: 5%; /* 缩小为当前宽度的一半 */
+}

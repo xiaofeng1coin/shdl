@@ -1,0 +1,32 @@
+<!-- login_log.html -->
+{% extends "base.html" %}
+{% block content %}
+    <link rel="stylesheet" href="/static/css/login_log.css">
+    <div class="login-log-container">
+        <h2 class="login-log-title">登录日志</h2>
+        <table class="login-log-table">
+            <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>登录时间</th>
+                    <th>登录地址</th>
+                    <th>登录IP</th>
+                    <th>登录设备</th>
+                    <th>登录状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in login_logs %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ log.login_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td>{{ log.login_location }}</td> <!-- 显示地理位置 -->
+                    <td>{{ log.ip_address }}</td>
+                    <td>{{ log.device_info }}</td>
+                    <td>{{ log.login_status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

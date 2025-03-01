@@ -22,3 +22,14 @@ class Link(db.Model):
     created_at = db.Column(db.DateTime, default=db.func.now())
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     clicks_at = db.Column(db.DateTime, nullable=True)
+
+# models.py
+class LoginLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    login_time = db.Column(db.DateTime, default=db.func.now())
+    ip_address = db.Column(db.String(100))
+    device_info = db.Column(db.String(100))
+    login_status = db.Column(db.String(50))
+    login_location = db.Column(db.String(100))  # 添加地理位置字段
+    user = db.relationship('User', backref=db.backref('login_logs', lazy=True))
