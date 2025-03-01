@@ -169,6 +169,10 @@
                         showConfirmButton: false,
                         timer: 1500
                     });
+                    // 动态更新短链接框内容
+                    const shortLinkCell = row.querySelector('.col-short-link');
+                    shortLinkCell.querySelector('a').href = `{{ base_url }}${newCustomSuffix}`;
+                    shortLinkCell.querySelector('a').innerText = `{{ base_url }}${newCustomSuffix}`;
                     originalUrlCell.innerHTML = newOriginalUrl;
                     customSuffixCell.innerHTML = newCustomSuffix;
                     originalUrlCell.setAttribute('data-url', newOriginalUrl);

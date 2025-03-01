@@ -1,3 +1,4 @@
+<!-- stats.html -->
 {% extends "base.html" %}
 {% block content %}
     <link rel="stylesheet" href="/static/css/stats.css">
@@ -9,8 +10,12 @@
 
         <div class="stats-summary">
             <div class="stats-clicks">
-                <h3>总点击量</h3>
-                <p class="stats-total-clicks">{{ total_clicks }}</p> <!-- 使用后端传递的总点击量 -->
+                <h3>今日点击量</h3>
+                <p class="stats-total-clicks">{{ total_clicks }}</p>
+            </div>
+            <div class="stats-clicks">
+                <h3>昨日点击量</h3>
+                <p class="stats-total-clicks">{{ yesterday_clicks }}</p>
             </div>
         </div>
 

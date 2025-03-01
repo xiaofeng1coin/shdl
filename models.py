@@ -33,3 +33,9 @@ class LoginLog(db.Model):
     login_status = db.Column(db.String(50))
     login_location = db.Column(db.String(100))  # 添加地理位置字段
     user = db.relationship('User', backref=db.backref('login_logs', lazy=True))
+
+class ClickLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    link_id = db.Column(db.Integer, db.ForeignKey('link.id'), nullable=False)
+    click_time = db.Column(db.DateTime, default=db.func.now())
+    link = db.relationship('Link', backref=db.backref('click_logs', lazy=True))

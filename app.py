@@ -2,7 +2,7 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 from flask_login import login_user, logout_user, login_required, current_user, LoginManager
-from models import db, User, Link, LoginLog  # 确保导入 LoginLog
+from models import db, User, Link, LoginLog, ClickLog  # 确保导入 LoginLog
 from auth import login_manager
 from datetime import datetime, timedelta
 from sqlalchemy import func, desc
@@ -12,13 +12,21 @@ from user_agents import parse  # 导入 user_agents 库
 import requests  # 导入 requests 库
 from sqlalchemy.orm import joinedload
 import logging
+from apscheduler.schedulers.background import BackgroundScheduler  # 导入 APScheduler
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
+# 获取项目根目录的绝对路径
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+# 使用绝对路径指定数据库文件
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
+# 设置默认时区为北京时间
+app.config['TIMEZONE'] = pytz.timezone('Asia/Shanghai')
 
 # 初始化组件
 db.init_app(app)
@@ -26,6 +34,10 @@ login_manager.init_app(app)
 
 with app.app_context():
     db.create_all()
+
+# 配置日志
+logging.basicConfig(level=logging.DEBUG)
+app.logger.setLevel(logging.DEBUG)
 
 # 检查文件扩展名是否允许
 def allowed_file(filename):
@@ -80,7 +92,6 @@ def login():
         # 检查密码是否正确
         if user.password != password:
             # 记录登录失败的日志
-            user_ip = get_real_ip()
             login_location = get_login_location(user_ip)
             login_log = LoginLog(
                 user_id=user.id,
@@ -224,16 +235,40 @@ def links():
     return render_template('links.html', links=links, base_url=base_url)
 
 
+from datetime import datetime
+import pytz
+
 @app.route('/<short_code>')
 def redirect_to_original(short_code):
     link = Link.query.filter_by(short_code=short_code).first()
     if link:
-        # 更新点击量
-        link.clicks += 1
-        link.clicks_at = datetime.now()
-        db.session.commit()
+        app.logger.debug(f"Short code: {short_code}, Link found: {link}")
+        try:
+            # 更新点击量
+            link.clicks += 1
+            db.session.commit()
+            app.logger.debug(f"Updating clicks for link ID {link.id} from {link.clicks - 1} to {link.clicks}")
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error updating click count: {e}")
+            return f"Error updating click count: {e}", 500
+
+        try:
+            # 记录点击日志到 ClickLog 表
+            current_time = datetime.now(app.config['TIMEZONE'])  # 使用配置的时区
+            new_click_log = ClickLog(link_id=link.id, click_time=current_time)
+            db.session.add(new_click_log)
+            db.session.commit()
+            app.logger.debug(f"Creating click log for link ID {link.id} at {current_time}")
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Error creating click log: {e}")
+            return f"Error creating click log: {e}", 500
+
+        # 重定向到原始链接
         return redirect(link.original_url)
     else:
+        app.logger.warning(f"Short link not found: {short_code}")
         return "Short link not found", 404
 
 @app.route('/stats/<short_code>')
@@ -244,18 +279,33 @@ def link_stats(short_code):
         return "Link not found", 404
 
     # 获取当前日期
-    today = datetime.now().date()
-    # 生成日期范围（从今日开始，往前推8天）
+    # 在查询时使用正确的时区
+    yesterday = (datetime.now(app.config['TIMEZONE']) - timedelta(days=1)).date()
+    today = datetime.now(app.config['TIMEZONE']).date()
+
+    # 获取今日的点击量
+    today_clicks = ClickLog.query.filter(
+        ClickLog.link_id == link.id,
+        func.date(ClickLog.click_time) == today
+    ).count()
+
+    # 获取昨日的点击量
+    yesterday_clicks = ClickLog.query.filter(
+        ClickLog.link_id == link.id,
+        func.date(ClickLog.click_time) == yesterday
+    ).count()
+
+    # 获取最近9天的日期范围
     date_range = [(today - timedelta(days=i)) for i in range(8, -1, -1)]
     date_range_str = [date.strftime('%Y-%m-%d') for date in date_range]
 
     # 查询每个日期的点击量
     clicks_by_day = db.session.query(
-        func.date(Link.clicks_at).label('day'),
-        func.sum(Link.clicks).label('click_count')  # 统计每天的点击量
+        func.date(ClickLog.click_time).label('day'),
+        func.count(ClickLog.id).label('click_count')
     ).filter(
-        Link.short_code == short_code,
-        Link.clicks_at >= date_range[-1]  # 只查询最近9天的数据
+        ClickLog.link_id == link.id,
+        ClickLog.click_time >= date_range[-1]
     ).group_by('day').order_by('day').all()
 
     # 将查询结果转换为字典
@@ -268,14 +318,11 @@ def link_stats(short_code):
         days.append(date)
         clicks.append(clicks_dict.get(date, 0))  # 如果某天没有数据，则点击量为0
 
-    # 获取总点击量
-    total_clicks = link.clicks  # 使用Link模型中的clicks字段
-
     return render_template('stats.html',
                            link=link,
                            days=days,
                            clicks=clicks,
-                           total_clicks=total_clicks)  # 将总点击量传递到前端
+                           total_clicks=today_clicks)  # 修改为当日点击量
 @app.route('/profile')
 @login_required
 def profile():
@@ -518,8 +565,9 @@ def delete_user(user_id):
 @app.route('/login_log')
 @login_required
 def login_log():
-    # 查询当前用户的登录日志
-    login_logs = LoginLog.query.filter_by(user_id=current_user.id).order_by(desc(LoginLog.login_time)).all()
+    # 查询当前用户的登录日志（只保留最近半个月的数据）
+    half_month_ago = datetime.now() - timedelta(days=15)
+    login_logs = LoginLog.query.filter_by(user_id=current_user.id).filter(LoginLog.login_time >= half_month_ago).order_by(desc(LoginLog.login_time)).all()
     return render_template('login_log.html', login_logs=login_logs)
 
 # app.py
@@ -529,9 +577,22 @@ def superuser_login_log():
     if not current_user.is_superuser:
         return "您没有权限访问此页面", 403
 
-    # 查询所有用户的登录日志，并预加载关联的用户信息
-    login_logs = db.session.query(LoginLog).options(joinedload(LoginLog.user)).order_by(desc(LoginLog.login_time)).all()
+    # 查询所有用户的登录日志（只保留最近半个月的数据）
+    half_month_ago = datetime.now() - timedelta(days=15)
+    login_logs = db.session.query(LoginLog).options(joinedload(LoginLog.user)).filter(LoginLog.login_time >= half_month_ago).order_by(desc(LoginLog.login_time)).all()
     return render_template('superuser_login_log.html', login_logs=login_logs)
+
+def cleanup_login_logs():
+    """清理超过半个月的登录日志"""
+    half_month_ago = datetime.now() - timedelta(days=15)
+    LoginLog.query.filter(LoginLog.login_time < half_month_ago).delete()
+    db.session.commit()
+    print("Cleaned up old login logs")
+
+# 设置定时任务，每天凌晨清理日志
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=cleanup_login_logs, trigger='cron', hour=0, minute=0)
+scheduler.start()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8462)
