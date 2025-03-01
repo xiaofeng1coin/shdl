@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1 style="font-size: 24px;">管理短链</h1>
+    <h1 class="security-title">管理短链</h1>
     <form method="POST" class="links-form">
         <input type="url" name="original_url" placeholder="长链接" required>
         <input type="text" name="custom_suffix" placeholder="自定义后缀（可选）">
@@ -24,47 +24,100 @@
             <td class="col-clicks">{{ link.clicks }}</td>
             <td class="col-created-at">{{ link.created_at.strftime('%Y-%m-%d') }}</td>
             <td class="col-actions">
-    <button class="links-edit-btn" onclick="editLink('{{ link.short_code }}')">编辑</button>
-    <button class="links-save-btn" onclick="saveLink('{{ link.short_code }}')" style="display: none;">保存</button>
-    <button class="links-copy-btn" onclick="copyToClipboard('{{ base_url }}{{ link.short_code }}')">复制</button>
-    <button class="links-stats-btn" onclick="location.href='{{ url_for('link_stats', short_code=link.short_code) }}'">统计</button>
-    <button class="links-delete-btn" onclick="deleteLink('{{ link.short_code }}')">删除</button>
-</td>
+                <button class="links-edit-btn" onclick="editLink('{{ link.short_code }}')">编辑</button>
+                <button class="links-save-btn" onclick="saveLink('{{ link.short_code }}')" style="display: none;">保存</button>
+                <button class="links-copy-btn" onclick="copyToClipboard('{{ base_url }}{{ link.short_code }}')">复制</button>
+                <button class="links-stats-btn" onclick="location.href='{{ url_for('link_stats', short_code=link.short_code) }}'">统计</button>
+                <button class="links-delete-btn" onclick="deleteLink('{{ link.short_code }}')">删除</button>
+            </td>
         </tr>
         {% endfor %}
     </table>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js';
+            document.body.appendChild(script);
+
+            // 禁用 SweetAlert2 的默认焦点行为
+            Swal.setDefaults({
+                focusConfirm: false,
+                focusCancel: false
+            });
+        });
+
         function copyToClipboard(text) {
-            navigator.clipboard.writeText(text);
-            alert('已复制: ' + text);
+            navigator.clipboard.writeText(text).then(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: '复制成功',
+                    text: '短链接已复制到剪贴板',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }).catch((err) => {
+                Swal.fire({
+                    icon: 'error',
+                    title: '复制失败',
+                    text: '无法复制到剪贴板，请手动复制',
+                    showConfirmButton: true
+                });
+                console.error('Failed to copy: ', err);
+            });
         }
 
         function deleteLink(shortCode) {
-            if (confirm("确定要删除这个短链接吗？")) {
-                fetch("{{ url_for('delete_link') }}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ short_code: shortCode })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('短链接已删除');
-                        const row = document.querySelector(`tr[data-short-code="${shortCode}"]`);
-                        if (row) {
-                            row.remove();
+            Swal.fire({
+                title: '确认删除',
+                text: '确定要删除这个短链接吗？删除后将无法恢复。',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '确认删除',
+                cancelButtonText: '取消',
+                focusConfirm: false,
+                focusCancel: false,
+                stopKeydownPropagation: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch("{{ url_for('delete_link') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ short_code: shortCode })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '删除成功',
+                                text: '短链接已删除',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                            const row = document.querySelector(`tr[data-short-code="${shortCode}"]`);
+                            if (row) {
+                                row.remove();
+                            }
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: '删除失败',
+                                text: data.message
+                            });
                         }
-                    } else {
-                        alert('删除失败: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('删除失败');
-                });
-            }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: '删除失败',
+                            text: '发生错误，请稍后再试'
+                        });
+                    });
+                }
+            });
         }
 
         function editLink(shortCode) {
@@ -74,17 +127,14 @@
             const editBtn = row.querySelector('.links-edit-btn');
             const saveBtn = row.querySelector('.links-save-btn');
 
-            // 将显示内容转换为输入框
             originalUrlCell.innerHTML = `<input type="url" class="edit-url" value="${originalUrlCell.getAttribute('data-url')}">`;
             customSuffixCell.innerHTML = `<input type="text" class="edit-suffix" value="${customSuffixCell.getAttribute('data-suffix')}">`;
 
-            // 动态设置输入框宽度为列宽的90%
             const originalUrlInput = originalUrlCell.querySelector('.edit-url');
             const customSuffixInput = customSuffixCell.querySelector('.edit-suffix');
             originalUrlInput.style.width = `${originalUrlCell.offsetWidth * 0.9}px`;
             customSuffixInput.style.width = `${customSuffixCell.offsetWidth * 0.9}px`;
 
-            // 隐藏编辑按钮，显示保存按钮
             editBtn.style.display = 'none';
             saveBtn.style.display = 'inline-block';
         }
@@ -98,7 +148,6 @@
             const newOriginalUrl = row.querySelector('.edit-url').value;
             const newCustomSuffix = row.querySelector('.edit-suffix').value;
 
-            // 发起保存请求
             fetch("{{ url_for('update_link') }}", {
                 method: 'POST',
                 headers: {
@@ -113,23 +162,34 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('链接已更新');
-                    // 更新显示内容
+                    Swal.fire({
+                        icon: 'success',
+                        title: '更新成功',
+                        text: '短链接已更新',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
                     originalUrlCell.innerHTML = newOriginalUrl;
                     customSuffixCell.innerHTML = newCustomSuffix;
                     originalUrlCell.setAttribute('data-url', newOriginalUrl);
                     customSuffixCell.setAttribute('data-suffix', newCustomSuffix);
-
-                    // 隐藏保存按钮，显示编辑按钮
                     editBtn.style.display = 'inline-block';
                     saveBtn.style.display = 'none';
                 } else {
-                    alert('更新失败: ' + data.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: '更新失败',
+                        text: data.message
+                    });
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('更新失败');
+                Swal.fire({
+                    icon: 'error',
+                    title: '更新失败',
+                    text: '发生错误，请稍后再试'
+                });
             });
         }
     </script>

@@ -4,13 +4,16 @@
 }
 
 .links-create-btn {
-    background-color: #4CAF50;
+    display: inline-block; /* 确保按钮与其他元素对齐 */
+    padding: 8px 16px; /* 保持与操作按钮一致的内边距 */
+    background-color: #4CAF50; /* 保持绿色背景 */
     color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
+    border: 1px solid #333; /* 添加深色外边框线，与操作按钮一致 */
+    border-radius: 4px; /* 保持圆角一致 */
     text-decoration: none;
     cursor: pointer;
+    margin: 0 5px; /* 添加外边距，与操作按钮一致 */
+    vertical-align: middle; /* 确保按钮在同一水平线上 */
 }
 
 .links-table {
@@ -99,4 +102,51 @@
     box-sizing: border-box; /* 确保宽度计算包括内边距 */
     width: calc(100% - 20px); /* 输入框宽度为列宽减去20px */
     height: 28px; /* 输入框高度 */
+}
+
+.swal2-confirm,
+    .swal2-cancel {
+        outline: none !important; /* 移除默认的焦点边框 */
+        box-shadow: none !important; /* 移除可能的阴影效果 */
+    }
+
+.links-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* 长链接输入框样式 */
+.links-form input[type="url"] {
+    width: 720px; /* 设置长链接输入框的宽度 */
+    padding: 10px 15px; /* 增加内边距 */
+    border: 1px solid #ddd; /* 更浅的边框颜色 */
+    border-radius: 8px; /* 增大圆角 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+    font-size: 14px; /* 增大字体大小 */
+    transition: border-color 0.3s ease; /* 添加过渡效果 */
+    box-sizing: border-box;
+    margin-right: 20px; /* 在长链接输入框的右侧添加外边距 */
+}
+
+/* 自定义后缀输入框样式 */
+.links-form input[type="text"] {
+    width: 170px; /* 设置自定义后缀输入框的宽度 */
+    padding: 10px 15px; /* 增加内边距 */
+    border: 1px solid #ddd; /* 更浅的边框颜色 */
+    border-radius: 8px; /* 增大圆角 */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 添加阴影效果 */
+    font-size: 14px; /* 增大字体大小 */
+    transition: border-color 0.3s ease; /* 添加过渡效果 */
+    box-sizing: border-box;
+    margin-left: 48px; /* 在自定义后缀输入框的左侧添加外边距 */
+    margin-right: 12px; /* 在自定义后缀输入框的右侧添加外边距 */
+}
+
+/* 输入框聚焦时的样式 */
+.links-form input[type="url"]:focus,
+.links-form input[type="text"]:focus {
+    border-color: #4CAF50; /* 聚焦时边框颜色与按钮背景色一致 */
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.5); /* 聚焦时的阴影效果 */
+    outline: none; /* 移除默认的焦点边框 */
 }
