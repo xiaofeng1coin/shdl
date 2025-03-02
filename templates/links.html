@@ -22,7 +22,7 @@
             <td class="col-original-url" data-url="{{ link.original_url }}">{{ link.original_url }}</td>
             <td class="col-custom-suffix" data-suffix="{{ link.short_code }}">{{ link.short_code }}</td>
             <td class="col-clicks">{{ link.clicks }}</td>
-            <td class="col-created-at">{{ link.created_at.strftime('%Y-%m-%d') }}</td>
+            <td class="col-created-at">{{ link.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
             <td class="col-actions">
                 <button class="links-edit-btn" onclick="editLink('{{ link.short_code }}')">编辑</button>
                 <button class="links-save-btn" onclick="saveLink('{{ link.short_code }}')" style="display: none;">保存</button>

@@ -27,6 +27,7 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 # 设置默认时区为北京时间
 app.config['TIMEZONE'] = pytz.timezone('Asia/Shanghai')
+app.config['SECURE_ENTRY_PATH'] = '/ceshi'  # 自定义安全入口路径
 
 # 初始化组件
 db.init_app(app)
@@ -36,8 +37,8 @@ with app.app_context():
     db.create_all()
 
 # 配置日志
-logging.basicConfig(level=logging.DEBUG)
-app.logger.setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
+app.logger.setLevel(logging.INFO)
 
 # 检查文件扩展名是否允许
 def allowed_file(filename):
@@ -45,8 +46,12 @@ def allowed_file(filename):
 
 @app.route('/')
 def home():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
+    return "访问被拒绝，请通过安全入口访问", 403
+
+@app.route(app.config['SECURE_ENTRY_PATH'])
+def secure_entry():
+    # 设置一个标志，表示用户已经通过安全入口访问
+    session['secure_entry'] = True
     return redirect(url_for('login'))
 
 
@@ -80,47 +85,41 @@ def get_login_location(ip):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # 检查是否通过安全入口访问
+    if not session.get('secure_entry'):
+        return "访问被拒绝，请通过安全入口访问", 403
+
+    if request.method == 'GET':
+        session['can_register'] = True
+        return render_template('login.html')
     if request.method == 'POST':
         account_name = request.form['account_name']
         password = request.form['password']
-
-        # 查询用户是否存在
         user = User.query.filter_by(account_name=account_name).first()
         if not user:
             return jsonify({"error": "账户不存在"})
-
-        # 检查密码是否正确
         if user.password != password:
-            # 记录登录失败的日志
-            login_location = get_login_location(user_ip)
+            login_location = get_login_location(get_real_ip())
             login_log = LoginLog(
                 user_id=user.id,
                 login_time=datetime.now(),
-                ip_address=user_ip,
-                device_info="未知",  # 可以选择不解析 User-Agent 或设置为默认值
+                ip_address=get_real_ip(),
+                device_info="未知",
                 login_status="失败",
                 login_location=login_location
             )
             db.session.add(login_log)
             db.session.commit()
-            print(f"Login failed for user {user.account_name} from IP {user_ip}")  # 调试信息
+            print(f"Login failed for user {user.account_name} from IP {get_real_ip()}")
             return jsonify({"error": "密码错误"})
-
-        # 登录成功
         login_user(user, remember=True)
         session.permanent = True
         app.permanent_session_lifetime = timedelta(hours=24)
-
-        # 获取用户的 IP 地址和登录地址
         user_ip = get_real_ip()
         login_location = get_login_location(user_ip)
-
-        # 获取 User-Agent 信息
         user_agent = request.headers.get('User-Agent')
         parsed_agent = parse(user_agent)
         device_type = parsed_agent.os.family
-
-        # 记录登录成功的日志
         login_log = LoginLog(
             user_id=user.id,
             login_time=datetime.now(),
@@ -131,9 +130,7 @@ def login():
         )
         db.session.add(login_log)
         db.session.commit()
-        print(f"Login successful for user {user.account_name} from IP {user_ip}")  # 调试信息
-
-        # 重定向
+        print(f"Login successful for user {user.account_name} from IP {user_ip}")
         if user.is_superuser:
             return jsonify({"redirect": url_for('user_management')})
         else:
@@ -142,25 +139,19 @@ def login():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    if not session.get('can_register'):
+        return "您没有权限访问此页面", 403
     if request.method == 'POST':
         account_name = request.form['account_name']
         password = request.form['password']
-        confirm_password = request.form['confirm_password']  # 新增密码确认
-        nickname = request.form['nickname']  # 新增昵称
-
-        # 校验密码和确认密码是否一致
+        confirm_password = request.form['confirm_password']
+        nickname = request.form['nickname']
         if password != confirm_password:
             return jsonify({"error": "两次输入的密码不一致"})
-
-        # 校验账户名是否已存在
         if User.query.filter_by(account_name=account_name).first():
             return jsonify({"error": "账户名已存在"})
-
-        # 校验昵称是否已存在
         if User.query.filter_by(nickname=nickname).first():
             return jsonify({"error": "昵称已被使用"})
-
-        # 创建新用户
         new_user = User(account_name=account_name, password=password, nickname=nickname)
         db.session.add(new_user)
         db.session.commit()
@@ -407,9 +398,25 @@ def delete_account():
     try:
         # 获取当前用户
         user = current_user
+        print(f"Deleting user: {user.id} ({user.account_name})")
+
+        # 删除与该用户关联的所有点击日志
+        click_logs = ClickLog.query.filter(ClickLog.link_id.in_([link.id for link in user.links])).all()
+        print(f"Deleting {len(click_logs)} click logs")
+        ClickLog.query.filter(ClickLog.link_id.in_([link.id for link in user.links])).delete(synchronize_session=False)
+
+        # 删除与该用户关联的所有短链接
+        links = Link.query.filter_by(user_id=user.id).all()
+        print(f"Deleting {len(links)} links")
+        Link.query.filter_by(user_id=user.id).delete(synchronize_session=False)
 
         # 删除与该用户关联的所有登录日志
-        LoginLog.query.filter_by(user_id=user.id).delete()
+        login_logs = LoginLog.query.filter_by(user_id=user.id).all()
+        print(f"Deleting {len(login_logs)} login logs")
+        LoginLog.query.filter_by(user_id=user.id).delete(synchronize_session=False)
+
+        # 提交删除操作，确保数据一致性
+        db.session.commit()
 
         # 删除当前用户
         db.session.delete(user)
@@ -420,6 +427,7 @@ def delete_account():
         return jsonify({"success": True, "message": "账户已注销，您将被重定向到登录页面"})
     except Exception as e:
         print(f"Error deleting account: {e}")  # 打印错误信息
+        db.session.rollback()  # 回滚事务，防止部分删除
         return jsonify({"success": False, "message": "注销失败，请稍后再试"})
 
 @app.route('/delete_link', methods=['POST'])
@@ -471,23 +479,23 @@ def create_link():
     if not original_url:
         return jsonify({"success": False, "message": "长链接不能为空"})
 
-    # 检查自定义后缀是否冲突
     if custom_suffix and Link.query.filter_by(short_code=custom_suffix).first():
         return jsonify({"success": False, "message": "自定义后缀已存在"})
 
     # 生成短链接
     short_code = custom_suffix or secrets.token_urlsafe(4)
 
-    # 创建新的短链接
+    # 创建新的短链接，显式设置时间
+    created_at = datetime.now(app.config['TIMEZONE']).replace(second=0, microsecond=0)  # 去掉秒和微秒
     new_link = Link(
         original_url=original_url,
         short_code=short_code,
-        user_id=current_user.id
+        user_id=current_user.id,
+        created_at=created_at
     )
     db.session.add(new_link)
     db.session.commit()
 
-    # 返回新创建的短链数据
     return jsonify({
         "success": True,
         "message": "短链接已创建",
@@ -495,7 +503,7 @@ def create_link():
             "short_code": new_link.short_code,
             "original_url": new_link.original_url,
             "clicks": new_link.clicks,
-            "created_at": new_link.created_at.strftime('%Y-%m-%d')
+            "created_at": created_at.strftime('%Y-%m-%d %H:%M')  # 返回格式化的时间
         }
     })
 
@@ -594,5 +602,27 @@ scheduler = BackgroundScheduler()
 scheduler.add_job(func=cleanup_login_logs, trigger='cron', hour=0, minute=0)
 scheduler.start()
 
+def cleanup_clicks_at():
+    # 计算10天前的时间
+    ten_days_ago = datetime.now() - timedelta(days=10)
+    # 删除超过10天的点击记录
+    Link.query.filter(Link.clicks_at < ten_days_ago).update({"clicks_at": None})
+    db.session.commit()
+    print("Cleaned up old clicks_at records")
+
+# 添加定时任务，每天凌晨清理
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=cleanup_clicks_at, trigger='cron', hour=0, minute=0)
+scheduler.start()
+
+@app.before_request
+def check_secure_entry():
+    # 允许的路径
+    allowed_paths = [app.config['SECURE_ENTRY_PATH'], '/static/', '/favicon.ico']
+    # 检查是否通过安全入口访问
+    if request.path not in allowed_paths and not request.path.startswith('/static/'):
+        if not session.get('secure_entry'):
+            return "访问被拒绝，请通过安全入口访问", 403
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8462)
+    app.run(host='0.0.0.0', port=8462, debug=False)
