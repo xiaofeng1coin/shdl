@@ -1,17 +1,25 @@
-# 基于 Python 3.9 镜像
+# 基于Python官方镜像构建
 FROM python:3.9-slim
 
 # 设置工作目录
 WORKDIR /app
 
-# 设置 PATH 环境变量（假设 gunicorn 在虚拟环境中）
-ENV PATH="/path/to/your/virtualenv/bin:${PATH}"
+# 将项目中的 requirements.txt 文件复制到容器的工作目录
+COPY shdl/requirements.txt .
 
-# 复制项目文件和安装依赖
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+# 安装项目所需的依赖包
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# 将整个项目复制到容器的工作目录
+COPY shdl/ .
 
-# 启动命令
-CMD ["gunicorn", "-b", "0.0.0.0:8462", "app:app"]
+# 设置环境变量
+ENV FLASK_APP=app.py
+ENV FLASK_RUN_HOST=0.0.0.0
+ENV FLASK_RUN_PORT=8462
+
+# 暴露端口
+EXPOSE 8462
+
+# 定义容器启动时执行的命令
+CMD ["flask", "run"]
