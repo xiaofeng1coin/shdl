@@ -27,7 +27,7 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 # 设置默认时区为北京时间
 app.config['TIMEZONE'] = pytz.timezone('Asia/Shanghai')
-app.config['SECURE_ENTRY_PATH'] = '/ceshi'  # 自定义安全入口路径
+app.config['SECURE_ENTRY_PATH'] = '/guodong'  # 自定义安全入口路径
 
 # 初始化组件
 db.init_app(app)
