@@ -5,13 +5,13 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # 将项目中的 requirements.txt 文件复制到容器的工作目录
-COPY shdl/requirements.txt .
+COPY requirements.txt .
 
 # 安装项目所需的依赖包
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 将整个项目复制到容器的工作目录
-COPY shdl/ .
+COPY . .
 
 # 设置环境变量
 ENV FLASK_APP=app.py
