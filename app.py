@@ -13,6 +13,7 @@ import requests  # 导入 requests 库
 from sqlalchemy.orm import joinedload
 import logging
 from apscheduler.schedulers.background import BackgroundScheduler  # 导入 APScheduler
+from pytz import timezone
 
 
 app = Flask(__name__)
@@ -27,7 +28,10 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 # 设置默认时区为北京时间
 app.config['TIMEZONE'] = pytz.timezone('Asia/Shanghai')
-app.config['SECURE_ENTRY_PATH'] = '/guodong'  # 自定义安全入口路径
+# 从环境变量中读取安全入口路径，不允许设置默认值
+app.config['SECURE_ENTRY_PATH'] = os.getenv('SECURE_ENTRY_PATH')
+if not app.config['SECURE_ENTRY_PATH']:
+    raise ValueError("SECURE_ENTRY_PATH environment variable is not set. Please set it before running the application.")
 
 # 初始化组件
 db.init_app(app)
@@ -102,7 +106,7 @@ def login():
             login_location = get_login_location(get_real_ip())
             login_log = LoginLog(
                 user_id=user.id,
-                login_time=datetime.now(),
+                login_time=datetime.now(pytz.timezone('Asia/Shanghai')),
                 ip_address=get_real_ip(),
                 device_info="未知",
                 login_status="失败",
@@ -247,7 +251,10 @@ def redirect_to_original(short_code):
         try:
             # 记录点击日志到 ClickLog 表
             current_time = datetime.now(app.config['TIMEZONE'])  # 使用配置的时区
-            new_click_log = ClickLog(link_id=link.id, click_time=current_time)
+            new_click_log = ClickLog(
+                link_id=link.id,
+                click_time=datetime.now(pytz.timezone('Asia/Shanghai'))
+            )
             db.session.add(new_click_log)
             db.session.commit()
             app.logger.debug(f"Creating click log for link ID {link.id} at {current_time}")
@@ -599,7 +606,7 @@ def cleanup_login_logs():
 
 # 设置定时任务，每天凌晨清理日志
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=cleanup_login_logs, trigger='cron', hour=0, minute=0)
+scheduler.add_job(func=cleanup_login_logs, trigger='cron', hour=0, minute=0, timezone=timezone('Asia/Shanghai'))
 scheduler.start()
 
 def cleanup_clicks_at():
@@ -612,7 +619,7 @@ def cleanup_clicks_at():
 
 # 添加定时任务，每天凌晨清理
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=cleanup_clicks_at, trigger='cron', hour=0, minute=0)
+scheduler.add_job(func=cleanup_clicks_at, trigger='cron', hour=0, minute=0, timezone=timezone('Asia/Shanghai'))
 scheduler.start()
 
 @app.before_request

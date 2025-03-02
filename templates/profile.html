@@ -78,11 +78,11 @@
                             {"value": "UTC", "name": "协调世界时 (UTC)"}
                         ] %}
                         {% for tz in timezones %}
-                            <option value="{{ tz.value }}"
-                                    {% if current_user.timezone == tz.value %}selected{% endif %}>
-                                {{ tz.name }}
-                            </option>
-                        {% endfor %}
+    <option value="{{ tz.value }}"
+            {% if tz.value=="Asia/Shanghai" or current_user.timezone == tz.value %}selected{% endif %}>
+        {{ tz.name }}
+    </option>
+{% endfor %}
                     </select>
                 </div>
             </div>
