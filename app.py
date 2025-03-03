@@ -59,16 +59,17 @@ def secure_entry():
     return redirect(url_for('login'))
 
 
-# IPinfo API 配置
-IPINFO_API_KEY = "281293911c5b75"  # 替换为你的 IPinfo API 密钥
-IPINFO_URL = "https://ipinfo.io/{ip}/json?token={token}"
+# 替换为 Vore API 的配置
+VORE_API_URL = "https://api.vore.top/api/IPdata?ip={ip}"
 
 
 def get_real_ip():
     """获取真实的客户端 IP 地址"""
     if request.headers.getlist("X-Forwarded-For"):
-        return request.headers.getlist("X-Forwarded-For")[0]
+        # 获取 X-Forwarded-For 中的第一个 IP 地址（客户端的真实 IP）
+        return request.headers.getlist("X-Forwarded-For")[0].split(',')[0].strip()
     else:
+        # 如果没有 X-Forwarded-For，直接使用远程地址
         return request.remote_addr
 
 
@@ -78,14 +79,31 @@ def get_login_location(ip):
         return "本地"
 
     try:
-        response = requests.get(IPINFO_URL.format(ip=ip, token=IPINFO_API_KEY))
+        response = requests.get(VORE_API_URL.format(ip=ip))
         response.raise_for_status()
         location_data = response.json()
-        return f"{location_data.get('region', '未知')} {location_data.get('city', '未知')}"
+
+        if location_data.get("code") == 200:
+            # 从返回的 JSON 数据中提取地理位置信息
+            ipdata = location_data.get("ipdata", {})
+            region = ipdata.get("info1", "")  # 省份
+            city = ipdata.get("info2", "")   # 城市
+            district = ipdata.get("info3", "")  # 区/县
+
+            # 组合地理位置信息
+            if district:
+                location = f"{region} {city} {district}"
+            elif city:
+                location = f"{region} {city}"
+            else:
+                location = region or "未知"
+            return location
+        else:
+            print(f"API Error: {location_data.get('msg', 'Unknown error')}")
+            return "未知"
     except requests.RequestException as e:
         print(f"Error fetching location data: {e}")
         return "未知"
-
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

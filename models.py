@@ -29,7 +29,7 @@ class Link(db.Model):
 class LoginLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    login_time = db.Column(db.DateTime, default=db.func.now())
+    login_time = db.Column(db.DateTime, default=lambda: datetime.now(pytz.timezone('Asia/Shanghai')))
     ip_address = db.Column(db.String(100))
     device_info = db.Column(db.String(100))
     login_status = db.Column(db.String(50))
