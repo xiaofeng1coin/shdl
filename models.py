@@ -38,7 +38,7 @@ class LoginLog(db.Model):
 
 class ClickLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    link_id = db.Column(db.Integer, db.ForeignKey('link.id'), nullable=False)
+    link_id = db.Column(db.Integer, db.ForeignKey('link.id', ondelete='CASCADE'), nullable=False)
     click_time = db.Column(db.DateTime, default=db.func.now())
     link = db.relationship('Link', backref=db.backref('click_logs', lazy=True))
 

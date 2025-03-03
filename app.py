@@ -465,9 +465,16 @@ def delete_link():
 
     link = Link.query.filter_by(short_code=short_code, user_id=current_user.id).first()
     if link:
-        db.session.delete(link)
-        db.session.commit()  # 确保提交事务
-        return jsonify({"success": True, "message": "短链接已删除"})
+        try:
+            # 删除相关的 ClickLog 记录
+            ClickLog.query.filter_by(link_id=link.id).delete()
+            db.session.delete(link)
+            db.session.commit()
+            return jsonify({"success": True, "message": "短链接已删除"})
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"Failed to delete link: {e}")
+            return jsonify({"success": False, "message": "删除失败，请稍后再试"}), 500
     else:
         return jsonify({"success": False, "message": "短链接不存在或您无权删除"})
 

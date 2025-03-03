@@ -47,7 +47,22 @@
         });
 
         function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
+    console.log("Trying to copy:", text);
+
+    // 检查 navigator.clipboard 是否可用
+    if (!navigator.clipboard) {
+        console.warn("navigator.clipboard is not available. Falling back to traditional method.");
+        // 使用传统的复制方法
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.style.position = "fixed"; // 防止滚动到页面底部
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+
+        try {
+            const successful = document.execCommand("copy");
+            if (successful) {
                 Swal.fire({
                     icon: 'success',
                     title: '复制成功',
@@ -55,70 +70,141 @@
                     showConfirmButton: false,
                     timer: 1500
                 });
-            }).catch((err) => {
+            } else {
                 Swal.fire({
                     icon: 'error',
                     title: '复制失败',
                     text: '无法复制到剪贴板，请手动复制',
                     showConfirmButton: true
                 });
-                console.error('Failed to copy: ', err);
+            }
+        } catch (err) {
+            Swal.fire({
+                icon: 'error',
+                title: '复制失败',
+                text: '无法复制到剪贴板，请手动复制',
+                showConfirmButton: true
             });
+            console.error('Failed to copy: ', err);
         }
 
-        function deleteLink(shortCode) {
+        document.body.removeChild(textarea);
+        return;
+    }
+
+    // 如果 navigator.clipboard 可用，使用现代方法
+    navigator.clipboard.writeText(text).then(() => {
+        Swal.fire({
+            icon: 'success',
+            title: '复制成功',
+            text: '短链接已复制到剪贴板',
+            showConfirmButton: false,
+            timer: 1500
+        });
+    }).catch((err) => {
+        // 如果失败，尝试传统方法
+        console.error('Failed to copy using modern API:', err);
+        copyToClipboardFallback(text);
+    });
+}
+
+function copyToClipboardFallback(text) {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed"; // 防止滚动到页面底部
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+
+    try {
+        const successful = document.execCommand("copy");
+        if (successful) {
             Swal.fire({
-                title: '确认删除',
-                text: '确定要删除这个短链接吗？删除后将无法恢复。',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: '确认删除',
-                cancelButtonText: '取消',
-                focusConfirm: false,
-                focusCancel: false,
-                stopKeydownPropagation: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch("{{ url_for('delete_link') }}", {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ short_code: shortCode })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: '删除成功',
-                                text: '短链接已删除',
-                                showConfirmButton: false,
-                                timer: 1500
-                            });
-                            const row = document.querySelector(`tr[data-short-code="${shortCode}"]`);
-                            if (row) {
-                                row.remove();
-                            }
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: '删除失败',
-                                text: data.message
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: '删除失败',
-                            text: '发生错误，请稍后再试'
-                        });
-                    });
-                }
+                icon: 'success',
+                title: '复制成功',
+                text: '短链接已复制到剪贴板',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: '复制失败',
+                text: '无法复制到剪贴板，请手动复制',
+                showConfirmButton: true
             });
         }
+    } catch (err) {
+        Swal.fire({
+            icon: 'error',
+            title: '复制失败',
+            text: '无法复制到剪贴板，请手动复制',
+            showConfirmButton: true
+        });
+        console.error('Failed to copy using fallback method:', err);
+    }
+
+    document.body.removeChild(textarea);
+}
+
+        function deleteLink(shortCode) {
+    Swal.fire({
+        title: '确认删除',
+        text: '确定要删除这个短链接吗？删除后将无法恢复。',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: '确认删除',
+        cancelButtonText: '取消',
+        focusConfirm: false,
+        focusCancel: false,
+        stopKeydownPropagation: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch("{{ url_for('delete_link') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ short_code: shortCode })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '删除成功',
+                        text: '短链接已删除',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                    const row = document.querySelector(`tr[data-short-code="${shortCode}"]`);
+                    if (row) {
+                        row.remove();
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '删除失败',
+                        text: data.message || '未知错误'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: '删除失败',
+                    text: '服务器错误，请稍后再试'
+                });
+            });
+        }
+    });
+}
 
         function editLink(shortCode) {
             const row = document.querySelector(`tr[data-short-code="${shortCode}"]`);
