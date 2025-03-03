@@ -144,7 +144,7 @@ def login():
         device_type = parsed_agent.os.family
         login_log = LoginLog(
             user_id=user.id,
-            login_time=datetime.now(),
+            login_time=datetime.now(pytz.timezone('Asia/Shanghai')),
             ip_address=user_ip,
             device_info=device_type,
             login_status="成功",
@@ -190,26 +190,26 @@ def logout():
 @login_required
 def index():
     total_links = Link.query.filter_by(user_id=current_user.id).count()
-    current_month = datetime.now().strftime('%Y-%m')
+    current_month = datetime.now(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m')
     monthly_links = Link.query.filter(
         Link.user_id == current_user.id,
         func.strftime('%Y-%m', Link.created_at) == current_month
     ).count()
 
-    yesterday = datetime.now() - timedelta(days=1)
+    yesterday = datetime.now(pytz.timezone('Asia/Shanghai')) - timedelta(days=1)
     yesterday_date = yesterday.date()
     yesterday_links = Link.query.filter(
         Link.user_id == current_user.id,
         func.date(Link.created_at) == yesterday_date
     ).count()
 
-    today_date = datetime.now().date()
+    today_date = datetime.now(pytz.timezone('Asia/Shanghai')).date()
     today_links = Link.query.filter(
         Link.user_id == current_user.id,
         func.date(Link.created_at) == today_date
     ).count()
 
-    update_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    update_time = datetime.now(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S')
 
     links = Link.query.filter_by(user_id=current_user.id).order_by(Link.created_at.desc()).limit(5).all()
     return render_template('index.html',
@@ -599,7 +599,7 @@ def delete_user(user_id):
 @login_required
 def login_log():
     # 查询当前用户的登录日志（只保留最近半个月的数据）
-    half_month_ago = datetime.now() - timedelta(days=15)
+    half_month_ago = datetime.now(pytz.timezone('Asia/Shanghai')) - timedelta(days=15)
     login_logs = LoginLog.query.filter_by(user_id=current_user.id).filter(LoginLog.login_time >= half_month_ago).order_by(desc(LoginLog.login_time)).all()
     return render_template('login_log.html', login_logs=login_logs)
 
@@ -611,13 +611,13 @@ def superuser_login_log():
         return "您没有权限访问此页面", 403
 
     # 查询所有用户的登录日志（只保留最近半个月的数据）
-    half_month_ago = datetime.now() - timedelta(days=15)
+    half_month_ago = datetime.now(pytz.timezone('Asia/Shanghai')) - timedelta(days=15)
     login_logs = db.session.query(LoginLog).options(joinedload(LoginLog.user)).filter(LoginLog.login_time >= half_month_ago).order_by(desc(LoginLog.login_time)).all()
     return render_template('superuser_login_log.html', login_logs=login_logs)
 
 def cleanup_login_logs():
     """清理超过半个月的登录日志"""
-    half_month_ago = datetime.now() - timedelta(days=15)
+    half_month_ago = datetime.now(pytz.timezone('Asia/Shanghai')) - timedelta(days=15)
     LoginLog.query.filter(LoginLog.login_time < half_month_ago).delete()
     db.session.commit()
     print("Cleaned up old login logs")
@@ -629,7 +629,7 @@ scheduler.start()
 
 def cleanup_clicks_at():
     # 计算10天前的时间
-    ten_days_ago = datetime.now() - timedelta(days=10)
+    ten_days_ago = datetime.now(pytz.timezone('Asia/Shanghai')) - timedelta(days=10)
     # 删除超过10天的点击记录
     Link.query.filter(Link.clicks_at < ten_days_ago).update({"clicks_at": None})
     db.session.commit()
