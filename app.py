@@ -649,10 +649,21 @@ scheduler.start()
 
 @app.before_request
 def check_secure_entry():
-    # 允许的路径
-    allowed_paths = [app.config['SECURE_ENTRY_PATH'], '/static/', '/favicon.ico']
-    # 检查是否通过安全入口访问
-    if request.path not in allowed_paths and not request.path.startswith('/static/'):
+    request_path = request.path
+
+    # 获取所有短链后缀，并统一处理为带斜杠的形式
+    allowed_short_codes = [f"/{link.short_code.strip('/')}" for link in Link.query.with_entities(Link.short_code).all()]
+
+    # 允许的路径列表
+    allowed_paths = [
+        app.config['SECURE_ENTRY_PATH'],
+        '/static/',
+        '/favicon.ico',
+        *allowed_short_codes
+    ]
+
+    # 检查请求路径是否在允许的路径列表中
+    if request_path not in allowed_paths and not request_path.startswith('/static/'):
         if not session.get('secure_entry'):
             return "访问被拒绝，请通过安全入口访问", 403
 
