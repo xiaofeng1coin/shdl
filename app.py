@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, s
 from flask_login import login_user, logout_user, login_required, current_user, LoginManager
 from models import db, User, Link, LoginLog, ClickLog  # 确保导入 LoginLog
 from auth import login_manager
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from sqlalchemy import func, desc
 import secrets
 import pytz
@@ -41,8 +41,8 @@ with app.app_context():
     db.create_all()
 
 # 配置日志
-logging.basicConfig(level=logging.INFO)
-app.logger.setLevel(logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
+app.logger.setLevel(logging.DEBUG)
 
 # 检查文件扩展名是否允许
 def allowed_file(filename):
@@ -247,10 +247,6 @@ def links():
     base_url = request.host_url
     return render_template('links.html', links=links, base_url=base_url)
 
-
-from datetime import datetime
-import pytz
-
 @app.route('/<short_code>')
 def redirect_to_original(short_code):
     link = Link.query.filter_by(short_code=short_code).first()
@@ -290,42 +286,41 @@ def redirect_to_original(short_code):
 @app.route('/stats/<short_code>')
 @login_required
 def link_stats(short_code):
+    #app.logger.debug(f"Fetching link with short_code: {short_code}")
     link = Link.query.filter_by(short_code=short_code).first()
     if not link:
+        #app.logger.debug("Link not found")
         return "Link not found", 404
 
-    # 获取当前日期
-    # 在查询时使用正确的时区
-    yesterday = (datetime.now(app.config['TIMEZONE']) - timedelta(days=1)).date()
-    today = datetime.now(app.config['TIMEZONE']).date()
+    #app.logger.debug("Link found")
+    now = datetime.now(app.config['TIMEZONE'])
+    today = now.date()
 
-    # 获取今日的点击量
-    today_clicks = ClickLog.query.filter(
-        ClickLog.link_id == link.id,
-        func.date(ClickLog.click_time) == today
-    ).count()
-
-    # 获取昨日的点击量
-    yesterday_clicks = ClickLog.query.filter(
-        ClickLog.link_id == link.id,
-        func.date(ClickLog.click_time) == yesterday
-    ).count()
-
-    # 获取最近9天的日期范围
-    date_range = [(today - timedelta(days=i)) for i in range(8, -1, -1)]
+    # 获取最近9天的日期范围（从今天开始往前推8天）
+    date_range = [(today - timedelta(days=i)) for i in range(0, 9)]
     date_range_str = [date.strftime('%Y-%m-%d') for date in date_range]
+    #app.logger.debug(f"Date range: {date_range_str}")
 
-    # 查询每个日期的点击量
-    clicks_by_day = db.session.query(
-        func.date(ClickLog.click_time).label('day'),
-        func.count(ClickLog.id).label('click_count')
-    ).filter(
-        ClickLog.link_id == link.id,
-        ClickLog.click_time >= date_range[-1]
-    ).group_by('day').order_by('day').all()
+    # 计算最近9天的起始日期（最早日期）
+    query_start = date_range[-1].strftime('%Y-%m-%d')
+    #app.logger.debug(f"Query start date: {query_start}")
+
+    # 使用原生SQL查询每个日期的点击量
+    query = f"""
+    SELECT strftime('%Y-%m-%d', click_time) AS day, COUNT(*) AS click_count 
+    FROM click_log 
+    WHERE link_id = {link.id} AND click_time >= '{query_start} 00:00:00' 
+    GROUP BY day 
+    ORDER BY day;
+    """
+    app.logger.debug(f"Executing raw SQL query: {query}")
+    result = db.session.execute(query)
+    clicks_by_day = result.fetchall()
+    #app.logger.debug(f"Clicks by day query result: {clicks_by_day}")
 
     # 将查询结果转换为字典
-    clicks_dict = {day: count for day, count in clicks_by_day}
+    clicks_dict = {row[0]: row[1] for row in clicks_by_day}
+    #app.logger.debug(f"Clicks dictionary: {clicks_dict}")
 
     # 生成完整的日期和点击量数据
     days = []
@@ -333,12 +328,41 @@ def link_stats(short_code):
     for date in date_range_str:
         days.append(date)
         clicks.append(clicks_dict.get(date, 0))  # 如果某天没有数据，则点击量为0
+        #app.logger.debug(f"Date: {date}, Clicks: {clicks_dict.get(date, 0)}")
 
+    #app.logger.debug(f"Days: {days}, Clicks: {clicks}")
+
+    # 在渲染模板时反转日期和点击量列表
+    days.reverse()
+    clicks.reverse()
+
+    # 查询昨日和今日的点击量
+    yesterday = today - timedelta(days=1)
+    yesterday_start = datetime.combine(yesterday, time.min).astimezone(app.config['TIMEZONE'])
+    yesterday_end = datetime.combine(yesterday, time.max).astimezone(app.config['TIMEZONE'])
+    yesterday_clicks = ClickLog.query.filter(
+        ClickLog.link_id == link.id,
+        ClickLog.click_time >= yesterday_start,
+        ClickLog.click_time <= yesterday_end
+    ).count()
+    #app.logger.debug(f"Yesterday clicks: {yesterday_clicks}")
+
+    today_start = datetime.combine(today, time.min).astimezone(app.config['TIMEZONE'])
+    today_end = datetime.combine(today, time.max).astimezone(app.config['TIMEZONE'])
+    today_clicks = ClickLog.query.filter(
+        ClickLog.link_id == link.id,
+        ClickLog.click_time >= today_start,
+        ClickLog.click_time <= today_end
+    ).count()
+    #app.logger.debug(f"Today clicks: {today_clicks}")
+
+    # 确保返回一个有效的响应
     return render_template('stats.html',
                            link=link,
+                           yesterday_clicks=yesterday_clicks,
+                           today_clicks=today_clicks,
                            days=days,
-                           clicks=clicks,
-                           total_clicks=today_clicks)  # 修改为当日点击量
+                           clicks=clicks)
 @app.route('/profile')
 @login_required
 def profile():

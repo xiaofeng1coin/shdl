@@ -9,13 +9,15 @@
         </div>
 
         <div class="stats-summary">
+            <!-- 左侧：昨日点击量 -->
             <div class="stats-clicks">
-                <h3>今日点击量</h3>
-                <p class="stats-total-clicks">{{ total_clicks }}</p>
+                <div class="stats-clicks-title">昨日点击量</div>
+                <div class="stats-total-clicks">{{ yesterday_clicks }}</div>
             </div>
+            <!-- 右侧：今日点击量 -->
             <div class="stats-clicks">
-                <h3>昨日点击量</h3>
-                <p class="stats-total-clicks">{{ yesterday_clicks }}</p>
+                <div class="stats-clicks-title">今日点击量</div>
+                <div class="stats-total-clicks">{{ today_clicks }}</div>
             </div>
         </div>
 
@@ -26,50 +28,54 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        // 从后端传递的数据
         const days = JSON.parse('{{ days|tojson|safe }}');
         const clicks = JSON.parse('{{ clicks|tojson|safe }}');
-        const totalClicks = parseInt("{{ total_clicks }}", 10);  // 确保转换为整数
 
+        // 调试信息
+        console.log("Days:", days);
+        console.log("Clicks:", clicks);
+
+        // 获取 canvas 元素
         const ctx = document.getElementById('stats-chart').getContext('2d');
-        const chartData = {
-            labels: days,
-            datasets: [{
-                label: '点击量',
-                data: clicks,
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                fill: true,
-            }]
-        };
 
-        const chartOptions = {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: '日期'
-                    }
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: '点击量'
+        // 创建折线图
+        const chart = new Chart(ctx, {
+            type: 'line', // 图表类型为折线图
+            data: {
+                labels: days, // X 轴标签（日期）
+                datasets: [{
+                    label: '点击量', // 数据集标签
+                    data: clicks, // 数据点（点击量）
+                    borderColor: 'rgba(75, 192, 192, 1)', // 折线颜色
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)', // 填充颜色
+                    fill: true, // 是否填充区域
+                    tension: 0.4 // 折线的平滑度
+                }]
+            },
+            options: {
+                responsive: true, // 响应式布局
+                maintainAspectRatio: false, // 不保持宽高比
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '日期' // X 轴标题
+                        }
                     },
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1,
-                        max: totalClicks
+                    y: {
+                        title: {
+                            display: true,
+                            text: '点击量' // Y 轴标题
+                        },
+                        beginAtZero: true, // Y 轴从0开始
+                        ticks: {
+                            stepSize: 1, // Y 轴刻度步长
+                            max: Math.max(...clicks) // Y 轴最大值
+                        }
                     }
                 }
             }
-        };
-
-        new Chart(ctx, {
-            type: 'line',
-            data: chartData,
-            options: chartOptions
         });
     </script>
 {% endblock %}

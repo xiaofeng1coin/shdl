@@ -1,32 +1,36 @@
 /* stats.css */
 
 /* 1. 总点击量样式优化 */
-.stats-summary .stats-clicks {
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 20px;
-    text-align: center;
-    margin: 0 auto;
-    width: 90%;
-    height: 30%;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+.stats-summary {
+    display: flex;
+    flex-direction: row; /* 改为水平排列 */
+    justify-content: space-between; /* 左右对齐，中间留出间隔 */
+    align-items: center; /* 垂直居中 */
+    margin-bottom: 20px;
+    width: 100%;
 }
 
-.stats-summary .stats-clicks h3 {
-    margin: 0 0 10px;
+.stats-clicks {
+    display: flex;
+    flex-direction: column; /* 标题和值垂直排列 */
+    align-items: center; /* 标题和值水平居中 */
+    width: 48%; /* 左右各占一半宽度 */
+}
+
+.stats-clicks-title {
     font-size: 1.25rem;
     font-weight: bold;
     color: #333;
+    margin-bottom: 10px; /* 标题和值之间的间距 */
 }
 
-.stats-summary .stats-clicks .stats-total-clicks {
+.stats-total-clicks {
     font-size: 2rem;
     font-weight: bold;
-    color: #4CAF50; /* 使用绿色突出显示总点击量 */
+    color: #4CAF50; /* 使用绿色突出显示点击量 */
 }
 
-/* 2. 其他样式保持不变 */
+/* 2. 统计页面容器样式 */
 .stats-container {
     background-color: #f9f9f9;
     padding: 20px;
@@ -36,6 +40,7 @@
     margin: 0 auto;
 }
 
+/* 3. 短链地址样式 */
 .stats-short-link {
     margin-bottom: 20px;
 }
@@ -51,6 +56,7 @@
     color: #333;
 }
 
+/* 4. 图表样式 */
 .stats-chart {
     margin-bottom: 20px;
     width: 100%;
@@ -62,53 +68,19 @@
     height: 100% !important;
 }
 
-.stats-details {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-}
-
-.stats-section {
-    background-color: #fff;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.stats-section h3 {
-    margin: 0 0 10px;
-    font-size: 1rem;
-    font-weight: bold;
-}
-
-.stats-section ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.stats-section ul li {
-    margin-bottom: 5px;
-    font-size: 0.9rem;
-    color: #666;
-}
-
-.stats-section ul li span {
-    font-weight: bold;
-    color: #333;
-}
-
-/* 响应式布局调整 */
+/* 5. 响应式布局调整 */
 @media (max-width: 768px) {
-    .stats-summary .stats-clicks {
-        width: 100%;
-    }
-
     .stats-summary {
-        flex-direction: column;
+        flex-direction: column; /* 小屏幕下改为垂直排列 */
+        align-items: center;
     }
 
-    .stats-details {
-        grid-template-columns: 1fr;
+    .stats-clicks {
+        width: 100%; /* 小屏幕下宽度占满 */
+        margin-bottom: 20px; /* 每个部分之间的间距 */
+    }
+
+    .stats-clicks-title {
+        margin-bottom: 5px;
     }
 }
