@@ -403,8 +403,14 @@ def update_nickname():
 def update_password():
     new_password = request.form.get('new_password')
     confirm_password = request.form.get('confirm_password')
+
+    # 调试信息：打印接收到的密码
+    app.logger.debug(f"Received new_password: {new_password}")
+    app.logger.debug(f"Received confirm_password: {confirm_password}")
+
     if not new_password or not confirm_password:
         return jsonify({"success": False, "message": "密码不能为空"})
+
     if new_password != confirm_password:
         return jsonify({"success": False, "message": "两次输入的密码不一致"})
 

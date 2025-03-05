@@ -89,57 +89,62 @@
 
         // 修改密码逻辑
         document.getElementById('edit-password-btn').addEventListener('click', function() {
-            Swal.fire({
-                title: '<span style="font-size: 16px;">修改密码</span>',
-                html: `
-                    <div style="text-align: center;">
-                        <input type="password" id="new-password" placeholder="请输入新密码" class="swal2-input" style="display: block; margin: 10px 0; font-size: 14px;">
-                        <input type="password" id="confirm-password" placeholder="再次输入新密码" class="swal2-input" style="display: block; margin: 10px 0; font-size: 14px;">
-                    </div>
-                `,
-                showCancelButton: true,
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                focusConfirm: false,
-                preConfirm: () => {
-                    const newPassword = document.getElementById('new-password').value;
-                    const confirmPassword = document.getElementById('confirm-password').value;
-                    if (!newPassword || !confirmPassword) {
-                        Swal.showValidationMessage('<span style="font-size: 14px;">密码不能为空</span>');
-                    } else if (newPassword !== confirmPassword) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: '密码不一致',
-                            text: '两次输入的密码不一致，请重新输入',
-                            confirmButtonText: '确定'
-                        });
-                        return false;
-                    }
-                    return { newPassword };
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch('/update_password', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            new_password: result.value.newPassword
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showNotification(data.message, 'success');
-                            setTimeout(() => {
-                                window.location.href = "{{ url_for('login') }}";
-                            }, 2000);
-                        } else {
-                            showNotification(data.message, 'error');
-                        }
-                    });
+    Swal.fire({
+        title: '<span style="font-size: 16px;">修改密码</span>',
+        html: `
+            <div style="text-align: center;">
+            <input type="password" id="new-password" placeholder="请输入新密码" class="swal2-input" style="display: block; margin: 10px 0; font-size: 14px; width: 100%; max-width: 700px;">
+            <input type="password" id="confirm-password" placeholder="再次输入新密码" class="swal2-input" style="display: block; margin: 10px 0; font-size: 14px; width: 100%; max-width: 700px;">
+        </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        focusConfirm: false,
+        preConfirm: () => {
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            // 验证密码是否为空
+            if (!newPassword || !confirmPassword) {
+                Swal.showValidationMessage('<span style="font-size: 14px;">密码不能为空</span>');
+            } else if (newPassword !== confirmPassword) {
+                Swal.fire({
+                    icon: 'error',
+                    title: '密码不一致',
+                    text: '两次输入的密码不一致，请重新输入',
+                    confirmButtonText: '确定'
+                });
+                return false;
+            }
+            return { newPassword };
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // 使用 URLSearchParams 编码表单数据
+            const formData = new URLSearchParams();
+            formData.append('new_password', result.value.newPassword);
+            formData.append('confirm_password', result.value.newPassword);
+
+            fetch('/update_password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification(data.message, 'success');
+                    setTimeout(() => {
+                        window.location.href = "{{ url_for('login') }}";
+                    }, 2000);
+                } else {
+                    showNotification(data.message, 'error');
                 }
             });
-        });
+        }
+    });
+});
 
         // 注销账户逻辑
         document.getElementById('delete-account-btn').addEventListener('click', function() {
