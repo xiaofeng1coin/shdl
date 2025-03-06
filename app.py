@@ -211,7 +211,7 @@ def index():
 
     update_time = datetime.now(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S')
 
-    links = Link.query.filter_by(user_id=current_user.id).order_by(Link.created_at.desc()).limit(5).all()
+    links = Link.query.filter_by(user_id=current_user.id).order_by(Link.created_at.desc()).limit(20).all()
     return render_template('index.html',
                            total_links=total_links,
                            monthly_links=monthly_links,
