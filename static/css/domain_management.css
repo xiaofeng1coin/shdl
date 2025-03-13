@@ -1,0 +1,89 @@
+/* domain_management.css */
+.domain-management-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.domain-management-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.domain-add-section {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.domain-add-section input {
+    flex: 1;
+    padding: 8px;
+    margin-right: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.domain-btn {
+    padding: 8px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.domain-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.domain-table th,
+.domain-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+.domain-table th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+}
+
+.domain-table .domain-display {
+    width: 70%;
+    text-align: left;
+    padding-left: 10px;
+}
+
+.domain-table .domain-edit-input {
+    width: 70%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: left;
+}
+
+.domain-table .edit-btn,
+.domain-table .save-btn,
+.domain-table .delete-btn {
+    padding: 8px 16px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.domain-table .edit-btn,
+.domain-table .save-btn {
+    background-color: #2196F3;
+    color: white;
+}
+
+.domain-table .delete-btn {
+    background-color: #d9534f;
+    color: white;
+}

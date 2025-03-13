@@ -41,6 +41,7 @@
                         <tr>
                             <th>序号</th>
                             <th>短链接</th>
+                            <th>操作</th>
                             <th>点击量</th>
                         </tr>
                     </thead>
@@ -49,9 +50,15 @@
                         <tr>
                             <td>{{ loop.index }}</td>
                             <td>
-                                <a href="{{ url_for('link_stats', short_code=link.short_code) }}" class="dashboard-link-url">
-                                    {{ request.host_url }}{{ link.short_code }}
-                                </a>
+                                <select class="short-link-select" onchange="updateShortLinkDisplay(this)" style="width: 100%; padding: 8px; font-size: 14px; text-align: center;">
+                                    <option value="default">{{ request.host_url }}{{ link.short_code }}</option>
+                                    {% for domain in current_user.domains %}
+                                    <option value="{{ domain.domain }}" style="text-align: center;">{{ domain.domain }}/{{ link.short_code }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <button class="jump-btn" onclick="jumpToOriginal('{{ link.short_code }}')">跳转</button>
                             </td>
                             <td>{{ link.clicks }}</td>
                         </tr>
@@ -61,4 +68,36 @@
             </div>
         </div>
     </div>
+
+    <style>
+        .jump-btn {
+            background-color: #4CAF50; /* 绿色背景 */
+            border: none; /* 无边框 */
+            color: white; /* 白色文字 */
+            padding: 8px 16px; /* 内边距 */
+            text-align: center; /* 文字居中 */
+            text-decoration: none; /* 无下划线 */
+            display: inline-block; /* 行内块元素 */
+            font-size: 14px; /* 字体大小 */
+            margin: 4px 2px; /* 外边距 */
+            cursor: pointer; /* 鼠标指针样式 */
+            border-radius: 4px; /* 圆角边框 */
+            transition: background-color 0.3s; /* 背景颜色过渡效果 */
+        }
+
+        .jump-btn:hover {
+            background-color: #45a049; /* 悬停时的背景颜色 */
+        }
+    </style>
+
+    <script>
+        function jumpToOriginal(shortCode) {
+            const row = event.target.closest('tr');
+            const selectElement = row.querySelector('.short-link-select');
+            const selectedIndex = selectElement.selectedIndex;
+            const selectedOption = selectElement.options[selectedIndex];
+            const shortLink = selectedOption.textContent.trim();
+            window.open(shortLink, '_blank'); // 在新标签页中打开
+        }
+    </script>
 {% endblock %}

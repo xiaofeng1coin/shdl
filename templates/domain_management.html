@@ -1,0 +1,226 @@
+<!-- domain_management.html -->
+{% extends "base.html" %}
+{% block content %}
+    <link rel="stylesheet" href="/static/css/domain_management.css">
+    <div class="domain-management-container">
+        <h2 class="domain-management-title">域名管理</h2>
+
+        <!-- 添加域名区域 -->
+        <div class="domain-add-section">
+            <input type="text" id="new-domain-input" placeholder="请输入域名（必须以 http:// 或 https:// 开头）" style="width: 70%;">
+            <button id="add-domain-btn" class="domain-btn" style="padding: 8px 16px; font-size: 14px;">添加</button>
+        </div>
+
+        <!-- 域名列表区域 -->
+        <div class="domain-list-section">
+            <table class="domain-table">
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>自定义域名</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for domain in domains %}
+                    <tr data-domain-id="{{ domain.id }}">
+                        <td>{{ loop.index }}</td>
+                        <td>
+                            <div class="domain-display">{{ domain.domain }}</div>
+                            <input type="text" class="domain-edit-input" value="{{ domain.domain }}" style="display: none;">
+                        </td>
+                        <td>
+                            <button class="edit-btn">编辑</button>
+                            <button class="save-btn" style="display: none;">保存</button>
+                            <button class="delete-btn">删除</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 添加 SweetAlert2 库
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@11.1.4/dist/sweetalert2.all.min.js';
+            document.head.appendChild(script);
+
+            // 添加域名
+            document.getElementById('add-domain-btn').addEventListener('click', function() {
+                const newDomain = document.getElementById('new-domain-input').value.trim();
+                if (!newDomain) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '错误',
+                        text: '域名不能为空'
+                    });
+                    return;
+                }
+                if (!/^(https?:\/\/)/.test(newDomain)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '错误',
+                        text: '域名必须以 http:// 或 https:// 开头'
+                    });
+                    return;
+                }
+                fetch('/add_domain', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `domain=${encodeURIComponent(newDomain)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '添加成功',
+                            text: data.message,
+                            showConfirmButton: false,
+                            timer: 3000 // 延长弹窗显示时间
+                        }).then(() => {
+                            // 在弹窗关闭后刷新页面
+                            document.getElementById('new-domain-input').value = '';
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '添加失败',
+                            text: data.message
+                        });
+                    }
+                });
+            });
+
+            // 编辑域名
+            const editBtns = document.querySelectorAll('.edit-btn');
+            editBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const displayCell = row.querySelector('.domain-display');
+                    const editCell = row.querySelector('.domain-edit-input');
+                    const editBtn = this;
+                    const saveBtn = row.querySelector('.save-btn');
+
+                    displayCell.style.display = 'none';
+                    editCell.style.display = 'block';
+                    editBtn.style.display = 'none';
+                    saveBtn.style.display = 'inline-block';
+                });
+            });
+
+            // 保存域名
+            const saveBtns = document.querySelectorAll('.save-btn');
+            saveBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const domainId = row.getAttribute('data-domain-id');
+                    const editCell = row.querySelector('.domain-edit-input');
+                    const newDomain = editCell.value.trim();
+
+                    if (!newDomain) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '错误',
+                            text: '域名不能为空'
+                        });
+                        return;
+                    }
+
+                    if (!/^(https?:\/\/)/.test(newDomain)) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '错误',
+                            text: '域名必须以 http:// 或 https:// 开头'
+                        });
+                        return;
+                    }
+
+                    fetch('/update_domain', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: `domain_id=${domainId}&new_domain=${encodeURIComponent(newDomain)}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '更新成功',
+                                text: data.message,
+                                showConfirmButton: false,
+                                timer: 3000 // 延长弹窗显示时间
+                            }).then(() => {
+                                // 在弹窗关闭后刷新页面
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: '更新失败',
+                                text: data.message
+                            });
+                        }
+                    });
+                });
+            });
+
+            // 删除域名
+            const deleteBtns = document.querySelectorAll('.delete-btn');
+            deleteBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    Swal.fire({
+                        title: '确认删除',
+                        text: '确定要删除该域名吗？',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const row = this.closest('tr');
+                            const domainId = row.getAttribute('data-domain-id');
+
+                            fetch('/delete_domain', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                },
+                                body: `domain_id=${domainId}`
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: '删除成功',
+                                        text: data.message,
+                                        showConfirmButton: false,
+                                        timer: 3000 // 延长弹窗显示时间
+                                    }).then(() => {
+                                        // 在弹窗关闭后移除行
+                                        row.remove();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: '删除失败',
+                                        text: data.message
+                                    });
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+{% endblock %}

@@ -14,6 +14,7 @@ from sqlalchemy.orm import joinedload
 import logging
 from apscheduler.schedulers.background import BackgroundScheduler  # 导入 APScheduler
 from pytz import timezone
+from models import db, User, Link, LoginLog, ClickLog, Domain  # 确保导入 Domain
 
 
 app = Flask(__name__)
@@ -282,6 +283,7 @@ def redirect_to_original(short_code):
     else:
         app.logger.warning(f"Short link not found: {short_code}")
         return "Short link not found", 404
+
 
 @app.route('/stats/<short_code>')
 @login_required
@@ -696,6 +698,58 @@ def check_secure_entry():
     if request_path not in allowed_paths and not request_path.startswith('/static/'):
         if not session.get('secure_entry'):
             return "访问被拒绝，请通过安全入口访问", 403
+
+
+# 域名管理页面
+@app.route('/domain_management')
+@login_required
+def domain_management():
+    # 获取用户的所有自定义域名
+    domains = Domain.query.filter_by(user_id=current_user.id).all()
+    return render_template('domain_management.html', domains=domains)
+
+# 添加自定义域名
+@app.route('/add_domain', methods=['POST'])
+@login_required
+def add_domain():
+    domain = request.form.get('domain')
+    if not domain:
+        return jsonify({"success": False, "message": "域名不能为空"})
+    if Domain.query.filter_by(domain=domain, user_id=current_user.id).first():
+        return jsonify({"success": False, "message": "该域名已存在"})
+    new_domain = Domain(domain=domain, user_id=current_user.id)
+    db.session.add(new_domain)
+    db.session.commit()
+    return jsonify({"success": True, "message": "域名添加成功"})
+
+# 更新自定义域名
+@app.route('/update_domain', methods=['POST'])
+@login_required
+def update_domain():
+    domain_id = request.form.get('domain_id')
+    new_domain = request.form.get('new_domain')
+    if not domain_id or not new_domain:
+        return jsonify({"success": False, "message": "参数错误"})
+    domain = Domain.query.filter_by(id=domain_id, user_id=current_user.id).first()
+    if not domain:
+        return jsonify({"success": False, "message": "域名不存在"})
+    domain.domain = new_domain
+    db.session.commit()
+    return jsonify({"success": True, "message": "域名更新成功"})
+
+# 删除自定义域名
+@app.route('/delete_domain', methods=['POST'])
+@login_required
+def delete_domain():
+    domain_id = request.form.get('domain_id')
+    if not domain_id:
+        return jsonify({"success": False, "message": "参数错误"})
+    domain = Domain.query.filter_by(id=domain_id, user_id=current_user.id).first()
+    if not domain:
+        return jsonify({"success": False, "message": "域名不存在"})
+    db.session.delete(domain)
+    db.session.commit()
+    return jsonify({"success": True, "message": "域名删除成功"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8462, debug=False)

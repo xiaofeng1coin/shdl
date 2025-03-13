@@ -18,7 +18,14 @@
         </tr>
         {% for link in links %}
         <tr data-short-code="{{ link.short_code }}">
-            <td class="col-short-link"><a href="{{ base_url }}{{ link.short_code }}" class="links-short-url">{{ base_url }}{{ link.short_code }}</a></td>
+            <td class="col-short-link">
+                <select class="short-link-select" onchange="updateShortLinkDisplay(this)" style="width: 100%; padding: 8px; font-size: 14px; text-align: center;">
+                    <option value="default">{{ request.host_url }}{{ link.short_code }}</option>
+                    {% for domain in current_user.domains %}
+                    <option value="{{ domain.domain }}" style="text-align: center;">{{ domain.domain }}/{{ link.short_code }}</option>
+                    {% endfor %}
+                </select>
+            </td>
             <td class="col-original-url" data-url="{{ link.original_url }}">{{ link.original_url }}</td>
             <td class="col-custom-suffix" data-suffix="{{ link.short_code }}">{{ link.short_code }}</td>
             <td class="col-clicks">{{ link.clicks }}</td>
@@ -26,7 +33,7 @@
             <td class="col-actions">
                 <button class="links-edit-btn" onclick="editLink('{{ link.short_code }}')">编辑</button>
                 <button class="links-save-btn" onclick="saveLink('{{ link.short_code }}')" style="display: none;">保存</button>
-                <button class="links-copy-btn" onclick="copyToClipboard('{{ base_url }}{{ link.short_code }}')">复制</button>
+                <button class="links-copy-btn" onclick="copyToClipboard(this)">复制</button>
                 <button class="links-stats-btn" onclick="location.href='{{ url_for('link_stats', short_code=link.short_code) }}'">统计</button>
                 <button class="links-delete-btn" onclick="deleteLink('{{ link.short_code }}')">删除</button>
             </td>
@@ -46,23 +53,59 @@
             });
         });
 
-        function copyToClipboard(text) {
-    console.log("Trying to copy:", text);
+        function copyToClipboard(button) {
+            const row = button.closest('tr');
+            const selectElement = row.querySelector('.short-link-select');
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const textToCopy = selectedOption.textContent.trim();
 
-    // 检查 navigator.clipboard 是否可用
-    if (!navigator.clipboard) {
-        console.warn("navigator.clipboard is not available. Falling back to traditional method.");
-        // 使用传统的复制方法
-        const textarea = document.createElement("textarea");
-        textarea.value = text;
-        textarea.style.position = "fixed"; // 防止滚动到页面底部
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
+            console.log("Trying to copy:", textToCopy);
 
-        try {
-            const successful = document.execCommand("copy");
-            if (successful) {
+            // 检查 navigator.clipboard 是否可用
+            if (!navigator.clipboard) {
+                console.warn("navigator.clipboard is not available. Falling back to traditional method.");
+                // 使用传统的复制方法
+                const textarea = document.createElement("textarea");
+                textarea.value = textToCopy;
+                textarea.style.position = "fixed"; // 防止滚动到页面底部
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+
+                try {
+                    const successful = document.execCommand("copy");
+                    if (successful) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '复制成功',
+                            text: '短链接已复制到剪贴板',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '复制失败',
+                            text: '无法复制到剪贴板，请手动复制',
+                            showConfirmButton: true
+                        });
+                    }
+                } catch (err) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '复制失败',
+                        text: '无法复制到剪贴板，请手动复制',
+                        showConfirmButton: true
+                    });
+                    console.error('Failed to copy using traditional method:', err);
+                }
+
+                document.body.removeChild(textarea);
+                return;
+            }
+
+            // 如果 navigator.clipboard 可用，使用现代方法
+            navigator.clipboard.writeText(textToCopy).then(() => {
                 Swal.fire({
                     icon: 'success',
                     title: '复制成功',
@@ -70,141 +113,105 @@
                     showConfirmButton: false,
                     timer: 1500
                 });
-            } else {
+            }).catch((err) => {
+                // 如果失败，尝试传统方法
+                console.error('Failed to copy using modern API:', err);
+                copyToClipboardFallback(textToCopy);
+            });
+        }
+
+        function copyToClipboardFallback(text) {
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.style.position = "fixed"; // 防止滚动到页面底部
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+
+            try {
+                const successful = document.execCommand("copy");
+                if (successful) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '复制成功',
+                        text: '短链接已复制到剪贴板',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '复制失败',
+                        text: '无法复制到剪贴板，请手动复制',
+                        showConfirmButton: true
+                    });
+                }
+            } catch (err) {
                 Swal.fire({
                     icon: 'error',
                     title: '复制失败',
                     text: '无法复制到剪贴板，请手动复制',
                     showConfirmButton: true
                 });
+                console.error('Failed to copy using fallback method:', err);
             }
-        } catch (err) {
-            Swal.fire({
-                icon: 'error',
-                title: '复制失败',
-                text: '无法复制到剪贴板，请手动复制',
-                showConfirmButton: true
-            });
-            console.error('Failed to copy: ', err);
+
+            document.body.removeChild(textarea);
         }
-
-        document.body.removeChild(textarea);
-        return;
-    }
-
-    // 如果 navigator.clipboard 可用，使用现代方法
-    navigator.clipboard.writeText(text).then(() => {
-        Swal.fire({
-            icon: 'success',
-            title: '复制成功',
-            text: '短链接已复制到剪贴板',
-            showConfirmButton: false,
-            timer: 1500
-        });
-    }).catch((err) => {
-        // 如果失败，尝试传统方法
-        console.error('Failed to copy using modern API:', err);
-        copyToClipboardFallback(text);
-    });
-}
-
-function copyToClipboardFallback(text) {
-    const textarea = document.createElement("textarea");
-    textarea.value = text;
-    textarea.style.position = "fixed"; // 防止滚动到页面底部
-    document.body.appendChild(textarea);
-    textarea.focus();
-    textarea.select();
-
-    try {
-        const successful = document.execCommand("copy");
-        if (successful) {
-            Swal.fire({
-                icon: 'success',
-                title: '复制成功',
-                text: '短链接已复制到剪贴板',
-                showConfirmButton: false,
-                timer: 1500
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: '复制失败',
-                text: '无法复制到剪贴板，请手动复制',
-                showConfirmButton: true
-            });
-        }
-    } catch (err) {
-        Swal.fire({
-            icon: 'error',
-            title: '复制失败',
-            text: '无法复制到剪贴板，请手动复制',
-            showConfirmButton: true
-        });
-        console.error('Failed to copy using fallback method:', err);
-    }
-
-    document.body.removeChild(textarea);
-}
 
         function deleteLink(shortCode) {
-    Swal.fire({
-        title: '确认删除',
-        text: '确定要删除这个短链接吗？删除后将无法恢复。',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: '确认删除',
-        cancelButtonText: '取消',
-        focusConfirm: false,
-        focusCancel: false,
-        stopKeydownPropagation: true
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch("{{ url_for('delete_link') }}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ short_code: shortCode })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Network response was not ok: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '删除成功',
-                        text: '短链接已删除',
-                        showConfirmButton: false,
-                        timer: 1500
+            Swal.fire({
+                title: '确认删除',
+                text: '确定要删除这个短链接吗？删除后将无法恢复。',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '确认删除',
+                cancelButtonText: '取消',
+                focusConfirm: false,
+                focusCancel: false,
+                stopKeydownPropagation: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch("{{ url_for('delete_link') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ short_code: shortCode })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: '删除成功',
+                                text: '短链接已删除',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                            const row = document.querySelector(`tr[data-short-code="${shortCode}"]`);
+                            if (row) {
+                                row.remove();
+                            }
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: '删除失败',
+                                text: data.message || '未知错误'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: '删除失败',
+                            text: '请稍后再试'
+                        });
                     });
-                    const row = document.querySelector(`tr[data-short-code="${shortCode}"]`);
-                    if (row) {
-                        row.remove();
-                    }
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: '删除失败',
-                        text: data.message || '未知错误'
-                    });
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: '删除失败',
-                    text: '服务器错误，请稍后再试'
-                });
             });
         }
-    });
-}
 
         function editLink(shortCode) {
             const row = document.querySelector(`tr[data-short-code="${shortCode}"]`);
@@ -256,9 +263,13 @@ function copyToClipboardFallback(text) {
                         timer: 1500
                     });
                     // 动态更新短链接框内容
-                    const shortLinkCell = row.querySelector('.col-short-link');
-                    shortLinkCell.querySelector('a').href = `{{ base_url }}${newCustomSuffix}`;
-                    shortLinkCell.querySelector('a').innerText = `{{ base_url }}${newCustomSuffix}`;
+                    const selectElement = row.querySelector('.short-link-select');
+                    selectElement.innerHTML = `
+                        <option value="default">{{ request.host_url }}${newCustomSuffix}</option>
+                        {% for domain in current_user.domains %}
+                        <option value="{{ domain.domain }}" style="text-align: center;">{{ domain.domain }}/${newCustomSuffix}</option>
+                        {% endfor %}
+                    `;
                     originalUrlCell.innerHTML = newOriginalUrl;
                     customSuffixCell.innerHTML = newCustomSuffix;
                     originalUrlCell.setAttribute('data-url', newOriginalUrl);
@@ -284,89 +295,90 @@ function copyToClipboardFallback(text) {
         }
 
         function createLink() {
-    const form = document.getElementById('create-link-form');
-    const formData = new FormData(form);
-    const originalUrl = formData.get('original_url');
-    const customSuffix = formData.get('custom_suffix');
+            const form = document.getElementById('create-link-form');
+            const formData = new FormData(form);
+            const originalUrl = formData.get('original_url');
+            const customSuffix = formData.get('custom_suffix');
 
-    if (!originalUrl) {
-        Swal.fire({
-            icon: 'error',
-            title: '输入错误',
-            text: '长链接不能为空'
-        });
-        return;
-    }
+            if (!originalUrl) {
+                Swal.fire({
+                    icon: 'error',
+                    title: '输入错误',
+                    text: '长链接不能为空'
+                });
+                return;
+            }
 
-    fetch("{{ url_for('create_link') }}", {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-        original_url: originalUrl,
-        custom_suffix: customSuffix
-    })
-})
-.then(response => response.json())
-.then(data => {
-    console.log("Response from backend:", data);  // 打印后端返回的数据
+            fetch("{{ url_for('create_link') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    original_url: originalUrl,
+                    custom_suffix: customSuffix
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '创建成功',
+                        text: '短链接已创建',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
 
-    if (data.success) {
-        Swal.fire({
-            icon: 'success',
-            title: '创建成功',
-            text: '短链接已创建',
-            showConfirmButton: false,
-            timer: 1500
-        });
+                    // 清空表单
+                    form.reset();
+                    const base_url = "{{ request.host_url }}";
+                    // 动态添加新短链到表格
+                    const linksTable = document.querySelector('.links-table tbody');
+                    const newRow = document.createElement('tr');
+                    newRow.setAttribute('data-short-code', data.link.short_code);
+                    newRow.innerHTML = `
+                        <td class="col-short-link">
+                            <select class="short-link-select" onchange="updateShortLinkDisplay(this)" style="width: 100%; padding: 8px; font-size: 14px; text-align: center;">
+                                <option value="default">{{ base_url }}${data.link.short_code}</option>
+                                {% for domain in current_user.domains %}
+                                <option value="{{ domain.domain }}" style="text-align: center;">{{ domain.domain }}/${data.link.short_code}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td class="col-original-url" data-url="${data.link.original_url}">${data.link.original_url}</td>
+                        <td class="col-custom-suffix" data-suffix="${data.link.short_code}">${data.link.short_code}</td>
+                        <td class="col-clicks">${data.link.clicks}</td>
+                        <td class="col-created-at">${data.link.created_at}</td>
+                        <td class="col-actions">
+                            <button class="links-edit-btn" onclick="editLink('${data.link.short_code}')">编辑</button>
+                            <button class="links-save-btn" onclick="saveLink('${data.link.short_code}')" style="display: none;">保存</button>
+                            <button class="links-copy-btn" onclick="copyToClipboard(this)">复制</button>
+                            <button class="links-stats-btn" onclick="location.href='{{ url_for('link_stats', short_code='') }}'.replace('', '${data.link.short_code}')">统计</button>
+                            <button class="links-delete-btn" onclick="deleteLink('${data.link.short_code}')">删除</button>
+                        </td>
+                    `;
+                    linksTable.appendChild(newRow);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '创建失败',
+                        text: data.message || '未知错误'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: '创建失败',
+                    text: '发生错误，请稍后再试'
+                });
+            });
+        }
 
-        // 清空表单
-        form.reset();
-const base_url = "{{ request.host_url }}";
-        // 动态添加新短链到表格
-        const linksTable = document.querySelector('.links-table tbody');
-        const newRow = document.createElement('tr');
-        newRow.setAttribute('data-short-code', data.link.short_code);
-        newRow.innerHTML = `
-            <td class="col-short-link"><a href="${base_url}${data.link.short_code}" class="links-short-url">${base_url}${data.link.short_code}</a></td>
-            <td class="col-original-url" data-url="${data.link.original_url}">${data.link.original_url}</td>
-            <td class="col-custom-suffix" data-suffix="${data.link.short_code}">${data.link.short_code}</td>
-            <td class="col-clicks">${data.link.clicks}</td>
-            <td class="col-created-at">${data.link.created_at}</td>
-            <td class="col-actions">
-                <button class="links-edit-btn" onclick="editLink('${data.link.short_code}')">编辑</button>
-                <button class="links-save-btn" onclick="saveLink('${data.link.short_code}')" style="display: none;">保存</button>
-                <button class="links-copy-btn" onclick="copyToClipboard('${base_url}${data.link.short_code}')">复制</button>
-                <button class="links-stats-btn" onclick="location.href='{{ url_for('link_stats', short_code='') }}'.replace('', '${data.link.short_code}')">统计</button>
-                <button class="links-delete-btn" onclick="deleteLink('${data.link.short_code}')">删除</button>
-            </td>
-        `;
-        linksTable.appendChild(newRow);
-    } else {
-        Swal.fire({
-            icon: 'error',
-            title: '创建失败',
-            text: data.message || '未知错误'
-        });
-    }
-})
-.catch(error => {
-    console.error('Error:', error);
-    Swal.fire({
-        icon: 'error',
-        title: '创建失败',
-        text: '发生错误，请稍后再试'
-    });
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: '创建失败',
-            text: '发生错误，请稍后再试'
-        });
-    });
-}
+        function updateShortLinkDisplay(selectElement) {
+            // 这个函数现在不再需要，因为展示内容已经包含在下拉选项中
+        }
     </script>
 {% endblock %}

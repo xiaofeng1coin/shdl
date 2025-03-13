@@ -42,3 +42,8 @@ class ClickLog(db.Model):
     click_time = db.Column(db.DateTime, default=db.func.now())
     link = db.relationship('Link', backref=db.backref('click_logs', lazy=True))
 
+class Domain(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    domain = db.Column(db.String(255), unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', backref=db.backref('domains', lazy=True))
