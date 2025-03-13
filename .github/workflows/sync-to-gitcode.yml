@@ -21,7 +21,7 @@ jobs:
         curl -I https://gitcode.com
     - name: Sync to GitCode
       run: |
-        git remote add gitcode https://$GITCODE_USERNAME:$GITCODE_TOKEN@gitcode.net/$GITCODE_USERNAME/$GITCODE_REPO_NAME.git
+        git remote add gitcode https://$GITCODE_USERNAME:$GITCODE_TOKEN@gitcode.com/$GITCODE_USERNAME/$GITCODE_REPO_NAME.git
         git push gitcode master
       env:
         GITCODE_USERNAME: ${{ secrets.GITCODE_USERNAME }}
