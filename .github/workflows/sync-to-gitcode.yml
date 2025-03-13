@@ -1,8 +1,12 @@
 name: Sync to GitCode
 on:
+  workflow_dispatch:
   push:
     branches:
-      - main
+      - master
+  pull_request:
+    branches:
+      - master
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -11,7 +15,7 @@ jobs:
       uses: actions/checkout@v2
     - name: Sync to GitCode
       run: |
-        git remote add gitcode https://gitcode.net/guodong346/shdl.git
-        git push gitcode main
+        git remote add gitcode https://gitcode.net/${{ secrets.GITCODE_USERNAME }}/${{ secrets.GITCODE_REPO_NAME }}.git
+        git push gitcode master
       env:
         GITCODE_TOKEN: ${{ secrets.GITCODE_TOKEN }}
