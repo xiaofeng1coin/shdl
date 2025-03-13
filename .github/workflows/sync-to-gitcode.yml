@@ -22,7 +22,7 @@ jobs:
     - name: Sync to GitCode
       run: |
         git remote add gitcode https://$GITCODE_USERNAME:$GITCODE_TOKEN@gitcode.com/$GITCODE_USERNAME/$GITCODE_REPO_NAME.git
-        git push gitcode master
+        git push gitcode master --force
       env:
         GITCODE_USERNAME: ${{ secrets.GITCODE_USERNAME }}
         GITCODE_TOKEN: ${{ secrets.GITCODE_TOKEN }}
