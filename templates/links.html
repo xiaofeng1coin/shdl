@@ -19,10 +19,10 @@
         {% for link in links %}
         <tr data-short-code="{{ link.short_code }}">
             <td class="col-short-link">
-                <select class="short-link-select" onchange="updateShortLinkDisplay(this)" style="width: 100%; padding: 8px; font-size: 14px; text-align: center;">
-                    <option value="default">{{ request.host_url }}{{ link.short_code }}</option>
+                <select class="short-link-select" onchange="saveDomainChoice(this)" style="width: 100%; padding: 8px; font-size: 14px; text-align: center;">
+                    <option value="default" {% if not link.selected_domain %}selected{% endif %}>{{ request.host_url }}{{ link.short_code }}</option>
                     {% for domain in current_user.domains %}
-                    <option value="{{ domain.domain }}" style="text-align: center;">{{ domain.domain }}/{{ link.short_code }}</option>
+                    <option value="{{ domain.domain }}" style="text-align: center;" {% if domain.domain == link.selected_domain %}selected{% endif %}>{{ domain.domain }}/{{ link.short_code }}</option>
                     {% endfor %}
                 </select>
             </td>
@@ -339,7 +339,7 @@
                     newRow.setAttribute('data-short-code', data.link.short_code);
                     newRow.innerHTML = `
                         <td class="col-short-link">
-                            <select class="short-link-select" onchange="updateShortLinkDisplay(this)" style="width: 100%; padding: 8px; font-size: 14px; text-align: center;">
+                            <select class="short-link-select" onchange="saveDomainChoice(this)" style="width: 100%; padding: 8px; font-size: 14px; text-align: center;">
                                 <option value="default">{{ base_url }}${data.link.short_code}</option>
                                 {% for domain in current_user.domains %}
                                 <option value="{{ domain.domain }}" style="text-align: center;">{{ domain.domain }}/${data.link.short_code}</option>
@@ -377,8 +377,30 @@
             });
         }
 
-        function updateShortLinkDisplay(selectElement) {
-            // 这个函数现在不再需要，因为展示内容已经包含在下拉选项中
+        function saveDomainChoice(selectElement) {
+            const row = selectElement.closest('tr');
+            const shortCode = row.getAttribute('data-short-code');
+            const selectedDomain = selectElement.value;
+
+            fetch('/save_domain_choice', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    short_code: shortCode,
+                    selected_domain: selectedDomain
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    console.error('保存域名选择失败:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('保存域名选择时发生错误:', error);
+            });
         }
     </script>
 {% endblock %}

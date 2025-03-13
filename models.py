@@ -24,6 +24,7 @@ class Link(db.Model):
     created_at = db.Column(db.DateTime, default=db.func.now())
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     clicks_at = db.Column(db.DateTime, nullable=True)
+    selected_domain = db.Column(db.String(255))  # 新增字段，存储用户选择的域名
 
 # models.py
 class LoginLog(db.Model):

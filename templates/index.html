@@ -51,9 +51,9 @@
                             <td>{{ loop.index }}</td>
                             <td>
                                 <select class="short-link-select" onchange="updateShortLinkDisplay(this)" style="width: 100%; padding: 8px; font-size: 14px; text-align: center;">
-                                    <option value="default">{{ request.host_url }}{{ link.short_code }}</option>
+                                    <option value="default" {% if not link.selected_domain %}selected{% endif %}>{{ request.host_url }}{{ link.short_code }}</option>
                                     {% for domain in current_user.domains %}
-                                    <option value="{{ domain.domain }}" style="text-align: center;">{{ domain.domain }}/{{ link.short_code }}</option>
+                                    <option value="{{ domain.domain }}" style="text-align: center;" {% if domain.domain == link.selected_domain %}selected{% endif %}>{{ domain.domain }}/{{ link.short_code }}</option>
                                     {% endfor %}
                                 </select>
                             </td>

@@ -212,15 +212,16 @@ def index():
 
     update_time = datetime.now(pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S')
 
-    links = Link.query.filter_by(user_id=current_user.id).order_by(Link.created_at.desc()).limit(20).all()
+    # 查询最近的短链接，并包含 selected_domain 字段
+    recent_links = Link.query.filter_by(user_id=current_user.id).order_by(Link.created_at.desc()).limit(20).all()
+
     return render_template('index.html',
                            total_links=total_links,
                            monthly_links=monthly_links,
                            yesterday_links=yesterday_links,
                            today_links=today_links,
                            update_time=update_time,
-                           link_count=len(links),
-                           recent_links=links)
+                           recent_links=recent_links)
 
 @app.route('/links', methods=['GET', 'POST'])
 @login_required
@@ -750,6 +751,21 @@ def delete_domain():
     db.session.delete(domain)
     db.session.commit()
     return jsonify({"success": True, "message": "域名删除成功"})
+
+@app.route('/save_domain_choice', methods=['POST'])
+@login_required
+def save_domain_choice():
+    data = request.json
+    short_code = data.get('short_code')
+    selected_domain = data.get('selected_domain')
+
+    link = Link.query.filter_by(short_code=short_code, user_id=current_user.id).first()
+    if link:
+        link.selected_domain = selected_domain  # 假设 Link 模型中有一个字段 selected_domain
+        db.session.commit()
+        return jsonify({"success": True, "message": "域名选择已保存"})
+    else:
+        return jsonify({"success": False, "message": "短链接不存在或您无权修改"})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8462, debug=False)
