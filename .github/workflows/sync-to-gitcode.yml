@@ -1,6 +1,5 @@
 name: Sync to GitCode
 on:
-  workflow_dispatch:
   push:
     branches:
       - master
@@ -13,9 +12,18 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+    - name: Configure Git
+      run: |
+        git config --global user.name "ceshi"
+        git config --global user.email "ceshi@gmail.com"
+    - name: Test network connection
+      run: |
+        curl -I https://gitcode.com
     - name: Sync to GitCode
       run: |
-        git remote add gitcode https://gitcode.com/${{ secrets.GITCODE_USERNAME }}/${{ secrets.GITCODE_REPO_NAME }}.git
+        git remote add gitcode https://$GITCODE_USERNAME:$GITCODE_TOKEN@gitcode.net/$GITCODE_USERNAME/$GITCODE_REPO_NAME.git
         git push gitcode master
       env:
+        GITCODE_USERNAME: ${{ secrets.GITCODE_USERNAME }}
         GITCODE_TOKEN: ${{ secrets.GITCODE_TOKEN }}
+        GITCODE_REPO_NAME: ${{ secrets.GITCODE_REPO_NAME }}
