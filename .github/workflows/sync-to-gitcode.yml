@@ -1,0 +1,17 @@
+name: Sync to GitCode
+on:
+  push:
+    branches:
+      - main
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Sync to GitCode
+      run: |
+        git remote add gitcode https://gitcode.net/guodong346/shdl.git
+        git push gitcode main
+      env:
+        GITCODE_TOKEN: ${{ secrets.GITCODE_TOKEN }}
